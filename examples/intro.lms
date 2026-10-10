@@ -1,0 +1,15 @@
+// Comments are written using double slashes.
+// Header files have extension .lmh, and are included similarly to C.
+#include <stdio.lmh>
+// Like C, there needs to be a function called main():
+func main() {
+	a = 10;         // Variables have no strict typing. Statements end in semicolons.
+	print(a);       // A print function for integers is implicitly defined.
+	b = 5;
+	b += 5;         // In place operation is permitted.
+	str = "Test\n"; // String literals are permitted, are null terminated, and are stored as a pointer to the first character. Pointer arithmetic still works.
+	if (a == b) { // If statement:
+        prints(str); // The lack of a strong typing system means separate print functions are required. Use flush() to print a newline.
+    }    
+	return 0;       // Not necessary inside main() (or any procedure really), but this is how you return values.
+}

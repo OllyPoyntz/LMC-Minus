@@ -1,0 +1,15 @@
+// Demonstration of conversion between integer types.
+#include <stdio.lmh>
+#include <stdlib.lmh>
+func main() {
+    // Numeric string:
+    string = "123";
+    // Converting it to a number:
+    num = atoi(string);
+    print(num);
+    // Convert it back to a string:
+    array buffer[8];
+    itoa(num, buffer);
+    puts(buffer);
+    flush();
+}

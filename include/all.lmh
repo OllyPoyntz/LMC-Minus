@@ -1,0 +1,5 @@
+// Catch-all header that includes everything as dependencies.
+#include <stdio.lmh>
+#include <stdlib.lmh>
+#include <string.lmh>
+#include <stdbool.lmh>

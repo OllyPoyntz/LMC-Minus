@@ -1,0 +1,264 @@
+_start LDA retbranch_80e7058879d1f19f35bc4cb920e344ddbea3e068
+STA main.retbranch
+BRA main
+retbranch_80e7058879d1f19f35bc4cb920e344ddbea3e068 BRA retpoint_80e7058879d1f19f35bc4cb920e344ddbea3e068
+retpoint_80e7058879d1f19f35bc4cb920e344ddbea3e068 LDA __int.0
+LDA main.retval
+HLT
+__base_load LDA _start
+__base_store STA _start
+main.retval DAT 0
+__func.main.string DAT 0
+__array___func.main.string DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+DAT 0
+__loadarray___func.main.string LDA __array___func.main.string
+__string.8347863222069993202 DAT 119
+DAT 97
+DAT 108
+DAT 116
+DAT 122
+DAT 98
+DAT 97
+DAT 100
+DAT 110
+DAT 121
+DAT 109
+DAT 112
+DAT 104
+DAT 102
+DAT 111
+DAT 114
+DAT 113
+DAT 117
+DAT 105
+DAT 99
+DAT 107
+DAT 106
+DAT 105
+DAT 103
+DAT 115
+DAT 118
+DAT 101
+DAT 120
+DAT 0
+load___string.8347863222069993202 LDA __string.8347863222069993202
+__func.main.sentence DAT 0
+__func.strcpy.dst DAT 0
+__func.strcpy.src DAT 0
+__func.strlen._string DAT 0
+strlen.retval DAT 0
+__int.0 DAT 0
+__int.1 DAT 1
+strlen LDA __int.0
+LDA __func.strlen._string
+ADD __base_load
+STA ___strlen_5d96a332a93f69da0563793345ee83216dec2cee.loop
+LDA __int.0
+STA ___strlen_5d96a332a93f69da0563793345ee83216dec2cee.count
+___strlen_5d96a332a93f69da0563793345ee83216dec2cee.loop LDA __func.strlen._string
+BRZ ___strlen_5d96a332a93f69da0563793345ee83216dec2cee.return
+LDA ___strlen_5d96a332a93f69da0563793345ee83216dec2cee.loop
+ADD __int.1
+STA ___strlen_5d96a332a93f69da0563793345ee83216dec2cee.loop
+LDA ___strlen_5d96a332a93f69da0563793345ee83216dec2cee.count
+ADD __int.1
+STA ___strlen_5d96a332a93f69da0563793345ee83216dec2cee.count
+BRA ___strlen_5d96a332a93f69da0563793345ee83216dec2cee.loop
+___strlen_5d96a332a93f69da0563793345ee83216dec2cee.count DAT 0
+___strlen_5d96a332a93f69da0563793345ee83216dec2cee.return LDA ___strlen_5d96a332a93f69da0563793345ee83216dec2cee.count
+STA strlen.retval
+BRA strlen.retbranch
+strlen.retbranch BRA __int.0
+__func.strcpy.length DAT 0
+__func.memcpy.dst DAT 0
+__func.memcpy.src DAT 0
+__func.memcpy.num DAT 0
+memcpy LDA __func.memcpy.dst
+ADD __base_store
+STA ___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.storeop
+LDA __func.memcpy.src
+ADD __base_load
+STA ___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.loadop
+LDA __func.memcpy.num
+STA ___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.count
+___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.loop LDA ___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.count
+BRZ ___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.return
+SUB __int.1
+STA ___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.count
+___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.loadop LDA __func.memcpy.src
+___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.storeop STA __func.memcpy.dst
+LDA ___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.loadop
+ADD __int.1
+STA ___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.loadop
+LDA ___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.storeop
+ADD __int.1
+STA ___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.storeop
+BRA ___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.loop
+___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.count DAT 0
+___memcpy_3df64daa75bb1a06d3918d4c2ad002a2ef0f3a25.return LDA __int.0
+memcpy.retbranch BRA __int.0
+strcpy LDA __func.strcpy.src
+STA __func.strlen._string
+LDA retbranch_74871986fe9b3dd19063fc1e27d24c34354833af
+STA strlen.retbranch
+BRA strlen
+retbranch_74871986fe9b3dd19063fc1e27d24c34354833af BRA retpoint_74871986fe9b3dd19063fc1e27d24c34354833af
+retpoint_74871986fe9b3dd19063fc1e27d24c34354833af LDA __int.0
+LDA strlen.retval
+STA __func.strcpy.length
+ADD __int.1
+STA __func.strcpy.length
+LDA __func.strcpy.dst
+STA __func.memcpy.dst
+LDA __func.strcpy.src
+STA __func.memcpy.src
+LDA __func.strcpy.length
+STA __func.memcpy.num
+LDA retbranch_a5e0f24e65ef5962c4999d34885c2d8d4bc5f0aa
+STA memcpy.retbranch
+BRA memcpy
+retbranch_a5e0f24e65ef5962c4999d34885c2d8d4bc5f0aa BRA retpoint_a5e0f24e65ef5962c4999d34885c2d8d4bc5f0aa
+retpoint_a5e0f24e65ef5962c4999d34885c2d8d4bc5f0aa LDA __int.0
+strcpy.retbranch BRA __int.0
+__func.main.length DAT 0
+__func.bsort.arr DAT 0
+__func.bsort.length DAT 0
+__int.3 DAT 3
+bsort LDA __int.1
+STA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.change
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.pass LDA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.change
+BRZ ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.return
+LDA __int.0
+STA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.change
+LDA __func.bsort.arr
+ADD __base_load
+STA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.loadop
+LDA __int.0
+STA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.pos
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.loadop LDA __func.bsort.arr
+STA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.num1
+LDA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.loadop
+ADD __int.1
+STA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.loadop2
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.loadop2 LDA __func.bsort.arr
+STA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.num2
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.compare SUB ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.num1
+BRP ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.next
+BRA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.swap
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.swap LDA __func.bsort.arr
+ADD ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.pos
+ADD __base_store
+STA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.storeop1
+ADD __int.1
+STA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.storeop2
+LDA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.num2
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.storeop1 STA __func.bsort.arr
+LDA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.num1
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.storeop2 STA __func.bsort.arr
+LDA __int.1
+STA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.change
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.next LDA __func.bsort.length
+SUB ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.pos
+SUB __int.3
+BRP ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.next2
+BRA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.pass
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.next2 LDA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.pos
+ADD __int.1
+STA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.pos
+ADD __func.bsort.arr
+ADD __base_load
+STA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.loadop
+BRA ___bsort_11fb7f741489e558b66a28370912f149a097ee6c.loadop
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.num1 DAT 0
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.num2 DAT 0
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.change DAT 0
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.pos DAT 0
+___bsort_11fb7f741489e558b66a28370912f149a097ee6c.return LDA __int.0
+bsort.retbranch BRA __int.0
+__func.prints.string DAT 0
+prints LDA __func.prints.string
+ADD __base_load
+STA ___prints_ca816f95ad8df985a2e5560f642cf8d7edcea1e2.loop
+___prints_ca816f95ad8df985a2e5560f642cf8d7edcea1e2.loop LDA __func.prints.string
+BRZ ___prints_ca816f95ad8df985a2e5560f642cf8d7edcea1e2.return
+OTC
+LDA ___prints_ca816f95ad8df985a2e5560f642cf8d7edcea1e2.loop
+ADD __int.1
+STA ___prints_ca816f95ad8df985a2e5560f642cf8d7edcea1e2.loop
+BRA ___prints_ca816f95ad8df985a2e5560f642cf8d7edcea1e2.loop
+___prints_ca816f95ad8df985a2e5560f642cf8d7edcea1e2.return LDA __func.prints.string
+prints.retbranch BRA __int.0
+__int.10 DAT 10
+main LDA __loadarray___func.main.string
+SUB __base_load
+STA __func.main.string
+LDA load___string.8347863222069993202
+SUB __base_load
+STA __func.main.sentence
+LDA __func.main.string
+STA __func.strcpy.dst
+LDA __func.main.sentence
+STA __func.strcpy.src
+LDA retbranch_67b9802e2721feefa68d52c6aba094bf6a8b25a5
+STA strcpy.retbranch
+BRA strcpy
+retbranch_67b9802e2721feefa68d52c6aba094bf6a8b25a5 BRA retpoint_67b9802e2721feefa68d52c6aba094bf6a8b25a5
+retpoint_67b9802e2721feefa68d52c6aba094bf6a8b25a5 LDA __int.0
+LDA __func.main.sentence
+STA __func.strlen._string
+LDA retbranch_0958da59c516a814eaeb989721ae253b7d61104a
+STA strlen.retbranch
+BRA strlen
+retbranch_0958da59c516a814eaeb989721ae253b7d61104a BRA retpoint_0958da59c516a814eaeb989721ae253b7d61104a
+retpoint_0958da59c516a814eaeb989721ae253b7d61104a LDA __int.0
+LDA strlen.retval
+STA __func.main.length
+LDA __func.main.string
+STA __func.bsort.arr
+LDA __func.main.length
+STA __func.bsort.length
+LDA retbranch_b84822742225ea8e7cc5901d600184e0946da685
+STA bsort.retbranch
+BRA bsort
+retbranch_b84822742225ea8e7cc5901d600184e0946da685 BRA retpoint_b84822742225ea8e7cc5901d600184e0946da685
+retpoint_b84822742225ea8e7cc5901d600184e0946da685 LDA __int.0
+LDA __func.main.string
+STA __func.prints.string
+LDA retbranch_a2a18e2aa1aa549e54ec589e930860d0a406a3f8
+STA prints.retbranch
+BRA prints
+retbranch_a2a18e2aa1aa549e54ec589e930860d0a406a3f8 BRA retpoint_a2a18e2aa1aa549e54ec589e930860d0a406a3f8
+retpoint_a2a18e2aa1aa549e54ec589e930860d0a406a3f8 LDA __int.0
+LDA __int.10
+OTC
+main.retbranch BRA __int.0

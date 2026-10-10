@@ -1,0 +1,58 @@
+asm print(num) {
+	LDA num;
+	OUT;
+}
+asm _prints(string) {
+	LDA string;
+	ADD __base_load;
+	STA loop;
+	loop LDA string;
+	BRZ return;
+	OTC;
+	LDA loop;
+	ADD 1;
+	STA loop;
+	BRA loop;
+	return LDA string;
+}
+asm flush() {
+	LDA 10;
+	OTC;
+}
+asm _input(reg) {
+	INP;
+	STA reg;
+}
+asm printc(char) {
+    LDA char;
+    OTC;
+}
+asm puts(char) {
+    LDA char;
+    OTC;
+}
+asm _write(string, chars) {
+    LDA string;
+    ADD __base_load;
+    STA loadop;
+    LDA chars;
+    STA count;
+    loop    LDA count;
+            BRZ return;
+            SUB 1;
+            STA count;
+    loadop  LDA string;
+            OTC;
+            LDA loadop;
+            ADD 1;
+            STA loadop;
+            BRA loop;
+    DAT count 0;
+    return LDA 1;
+}
+asm prompt() {
+    LDA 45;
+    OTC;
+    LDA 62;
+    OTC;
+}

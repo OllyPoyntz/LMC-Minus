@@ -1,0 +1,50 @@
+// Standard library functions (mostly wrappers)
+#include <string.lmh>
+// Memory allocation using a stack-based method:
+func malloc(amount) {
+    ptr = 0;
+    _malloc(ptr, amount);
+    return ptr;
+}
+// Zero-initialised allocation:
+func calloc(amount) {
+    ptr = malloc(amount);
+    memset(ptr, 0, amount);
+    return ptr;
+}
+// Freeing allocated memory:
+func free(amount) {
+    _free(amount);
+}
+// Converts a string to an integer:
+func atoi(string) {
+    num = 0;
+    _atoi(num, string);
+    return num;
+}
+// Converts an integer to a string, storing it in a buffer:
+func itoa(num, buffer) {
+    digits = 0;
+    num2 = num;
+    while (num2 > 0) {
+        digits += 1;
+        num2 /= 10;
+    }
+    num2 = num;
+    i = 0;
+    while (i < digits) {
+        digit = '0' + (num2 % 10);
+        targetpos = digits - 1 - i;
+        setchar(buffer, targetpos, digit);
+        num2 /= 10;
+        i += 1;
+    }
+    setchar(buffer, digits, 0);
+    return buffer;
+}
+// Performs a bubble sort on an array. Requires O(n^2) time.
+// (Bubble sort is by far the easiest sorting algorithm to implement, especially in assembly)
+func bsort(arr, length) {
+    _bsort(arr, length);
+}
+#define sort bsort

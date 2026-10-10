@@ -1,0 +1,163 @@
+asm _memcpy(dst, src, num) {
+    LDA dst;
+    ADD __base_store;
+    STA storeop;
+    LDA src;
+    ADD __base_load;
+    STA loadop;
+    LDA num;
+    STA count;
+    loop    LDA count;
+            BRZ return;
+            SUB 1;
+            STA count;
+    loadop  LDA src;
+    storeop STA dst;
+            LDA loadop;
+            ADD 1;
+            STA loadop;
+            LDA storeop;
+            ADD 1;
+            STA storeop;
+            BRA loop;
+    count DAT 0;
+    return LDA 0;
+}
+asm _memset(ptr, val, num) {
+    LDA ptr;
+    ADD __base_store;
+    STA storeop;
+    LDA num;
+    STA count;
+    loop    LDA count;
+            BRZ return;
+            SUB 1;
+            STA count;
+            LDA val;
+    storeop STA ptr;
+            LDA storeop;
+            ADD 1;
+            STA storeop;
+            BRA loop;
+    count DAT 0;
+    return LDA 0;
+}
+asm exit(code) {
+    LDA code;
+    HLT;
+}
+
+asm _malloc(reg, amount) {
+    loadop LDA __stack_pos;
+    ADD loadop;
+    SUB __base_load;
+    STA reg;
+    LDA __stack_pos;
+    ADD amount;
+    STA __stack_pos;
+}
+asm _free(amount) {
+    LDA __stack_pos;
+    SUB amount;
+    BRZ panic;
+    BRA return;
+    panic LDA 0;
+          HLT;
+    return STA __stack_pos;
+}
+asm _atoi(reg, string) {
+	LDA string;
+	ADD __base_load;
+	STA loadop;
+	LDA 0;
+	STA outnum;
+	
+	loadop  LDA string;
+			STA num;
+			BRZ return;
+			SUB 48;
+			BRP chkint;
+			BRA return;
+	chkint 	SUB 10;
+			BRP return;
+			BRA isdigit;
+	isdigit	LDA num;
+			SUB 48;
+			STA num;
+			LDA outnum;
+			// Yes, this is more efficient than using a loop:
+			ADD outnum;
+			ADD outnum;
+			ADD outnum;
+			ADD outnum;
+			ADD outnum;
+			ADD outnum;
+			ADD outnum;
+			ADD outnum;
+			ADD outnum;
+			ADD num;
+			STA outnum;
+			
+			LDA loadop;
+			ADD 1;
+			STA loadop;
+			BRA loadop;
+	outnum 	DAT 0;
+	num 	DAT 0;
+	count 	DAT 9;
+	return 	LDA outnum;
+			STA reg;
+}
+asm _bsort(arr, length) {
+    LDA 1;
+    STA change;
+    pass    LDA change;
+            BRZ return;
+            LDA 0;
+            STA change;
+            LDA arr;
+            ADD __base_load;
+            STA loadop;
+            LDA 0;
+            STA pos;
+    loadop  LDA arr;
+            STA num1;
+            LDA loadop;
+            ADD 1;
+            STA loadop2;
+    loadop2 LDA arr;
+            STA num2;
+    compare SUB num1;
+            BRP next;
+            BRA swap;
+    swap    LDA arr;
+            ADD pos;
+            ADD __base_store;
+            STA storeop1;
+            ADD 1;
+            STA storeop2;
+            LDA num2;
+            storeop1 STA arr;
+            LDA num1;
+            storeop2 STA arr;
+            LDA 1;
+            STA change;
+    next    LDA length;
+            SUB pos;
+            SUB 3;
+            BRP next2;
+            BRA pass;
+    next2   LDA pos;
+            ADD 1;
+            STA pos;
+            ADD arr;
+            ADD __base_load;
+            STA loadop;
+            BRA loadop;
+    num1 DAT 0;
+    num2 DAT 0;
+    change DAT 0;
+    pos DAT 0;
+    return LDA 0;
+}            
+            

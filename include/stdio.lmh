@@ -1,0 +1,28 @@
+// Functions relating to input and output.
+
+// Outputs a string:
+func prints(string) {
+    _prints(string);
+}
+// Ensure that C-style functions can be used:
+#define puts prints
+// Take user input, similar to Python's input function:
+func input() {
+    a = 0;
+    prompt();
+    _input(a);
+    return a;
+}
+// C compatibility:
+func write(string, chars) {
+    _write(string, chars);
+}
+// Outputs a boolean value:
+func printb(bool) {
+    outstr = "false";
+    if (bool) {
+        outstr = "true";
+    }
+    _prints(outstr);
+    flush();
+}

@@ -1,0 +1,8 @@
+func test() {
+    __var = 5;
+}
+func main() {
+    test();
+    __var += 5;
+    print(__var);
+}

@@ -1,0 +1,72 @@
+asm _strlen(reg, string) {
+	LDA string;
+	ADD __base_load;
+	STA loop;
+    LDA 0;
+    STA count;
+    loop LDA string;
+         BRZ return;
+         LDA loop;
+         ADD 1;
+         STA loop;
+         LDA count;
+         ADD 1;
+         STA count;
+         BRA loop;
+    count DAT 0;
+    return LDA count;
+           STA reg;
+}
+asm _strcmp(reg, string1, string2) {
+    LDA string1;
+    ADD __base_load;
+    STA load1;
+    LDA string2;
+    ADD __base_load;
+    STA load2;
+    load1 LDA string1;
+          STA char1;
+    load2 LDA string2;
+          STA char2;
+          SUB char1;
+          BRP pos;
+          BRA neq;    
+    pos   BRZ eqbra;
+          BRA neq;
+    eqbra LDA char1;
+          BRZ eq;
+          LDA load1;
+          ADD 1;
+          STA load1;
+          LDA load2;
+          ADD 1;
+          STA load2;
+          BRA load1;
+    neq LDA 0;
+        STA equal;
+        BRA return;
+    eq LDA 1;
+       STA equal;
+       BRA return;
+    char1 DAT 0;
+    char2 DAT 0;
+    equal DAT 0;
+    return LDA equal;
+           STA reg;
+}
+asm _getchar(reg, string, index) {
+    LDA string;
+    ADD index;
+    ADD __base_load;
+    STA loadop2;
+    loadop2 LDA string;
+    STA reg;
+}
+asm _setchar(string, index, char) {
+    LDA string;
+    ADD index;
+    ADD __base_store;
+    STA storeop;
+    LDA char;
+    storeop STA string;
+}

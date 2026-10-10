@@ -1,0 +1,21 @@
+// Example of the built in bsort() algorithm:
+#include <stdio.lmh>
+#include <stdlib.lmh>
+#include <string.lmh>
+func main() {
+    // Allocate an array with 32 mailboxes of space:
+    array string[32];
+    // Sentence to be sorted:
+    sentence = "waltzbadnymphforquickjigsvex";
+    
+    // Copy it to the array:
+    strcpy(string, sentence);
+    // Get the length of the sentence:
+    length = strlen(sentence);    
+    // Sort the array:
+    bsort(string, length);
+    // Output the sorted array to prove it worked:
+    puts(string);
+    // Print a newline:
+    flush();
+}

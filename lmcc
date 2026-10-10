@@ -1,0 +1,5 @@
+#!/usr/bin/python3
+'''Compiler for a custom language that converts it into Little Man Computer assembly.'''
+from src.interface import *
+if __name__ == '__main__':
+    main()
