@@ -3,22 +3,20 @@ func memcpy(dst, src, num) {
     _memcpy(dst, src, num);
 }
 func memset(ptr, val, num) {
-    _memset(dst, src, num);
+    _memset(ptr, src, num);
 }
-func strlen(_string) {
+func strlen(string) {
     length = 0;
-    _strlen(length, _string);
+    _strlen(length, string);
     return length;
 }
 func strcmp(string1, string2) {
     strings_equal = 0;
     _strcmp(strings_equal, string1, string2);
-    _print(10);
     return strings_equal;
 }
 func strcpy(dst, src) {
-    length = strlen(src);
-    length += 1;
+    length = strlen(src) + 1;
     memcpy(dst, src, length);
 }
 func strcat(dst, src) {

@@ -62,7 +62,7 @@ def convert_string_literals(tokens, asm, registers):
         elif isinstance(tokens[x], TokenList):
             tokens[x], asm, registers = convert_string_literals(tokens[x], asm, registers)
     return (tokens, asm, registers)
-#Returns (assembly, register to find result):
+#Returns (assembly, register in which to find result):
 def evaluate_expr(expression, registers = 0) -> tuple:
     '''Recursively generates assembly code to evaluate a function.'''
     asm = ''
@@ -81,8 +81,8 @@ def evaluate_expr(expression, registers = 0) -> tuple:
     #Convert string literals:
     tokens, newasm, registers = convert_string_literals(tokens, asm, registers)
     asm += newasm
+    #This token has a negative priority, ensuring that the function terminates:
     tokens.append(Token('@'))
-    #print(tokens)
     if len(tokens) == 2:
         if (isinstance(tokens[0], TokenList)):
             return evaluate_expr(tokens[0])
@@ -113,10 +113,34 @@ def evaluate_expr(expression, registers = 0) -> tuple:
             raise SyntaxError(f'Unable to use bracketed expression {tokens[0].data} as variable!')
         newasm, reg = evaluate_expr(tokens[2:-1], registers)
         asm += newasm
-        func = inline_functions['setval']
+        var = tokens[0]
+        if var.data.startswith('__ptr'):
+            func = inline_functions['_storeptr']
+        else:
+            func = inline_functions['_setval']
+        
         asm += func([tokens[0].data, reg])
         data_sect.add_var(tokens[0].data)
         return (asm, '__reg.0')
+    #Handle writing to arrays:
+    if len(tokens) >= 4 and isinstance(tokens[1], TokenList) and tokens[2].data == '=' and tokens[0].ttype == 'sym':
+        #Evaluate the index:
+        index_expr = [x for x in tokens[1]]
+        index_asm, index_reg = evaluate_expr(index_expr, registers)
+        asm += index_asm
+        reg = data_sect.add_register(registers)
+        registers += 1
+        
+        #Temporary pointer variable:
+        asm += f'''LDA {index_reg}
+ADD {tokens[0].data}
+STA __ptr
+'''
+        data_sect.add_var('__ptr')
+
+        new_expr = [Token('__ptr')] + tokens[2:-1]
+        final_asm, final_reg = evaluate_expr(new_expr, registers)
+        return (asm + final_asm, final_reg)
     while position + 1 < len(tokens):
         item = tokens[position]
         if isinstance(item, Token) and item.data not in data_sect.vars:
@@ -125,6 +149,7 @@ def evaluate_expr(expression, registers = 0) -> tuple:
         opr = tokens[position + 1]
         if item.ttype != 'sym' and not isinstance(item, TokenList):
             raise SyntaxError(f'Unexpected token: "{item.data}"')
+        #Operator is a TokenList - either a function call or a 
         if isinstance(opr, TokenList):
             #Function call:
             if opr.bracket == '(':
@@ -132,20 +157,43 @@ def evaluate_expr(expression, registers = 0) -> tuple:
                 if func in inline_functions:
                     raise SyntaxError(f'Function {func} has no return value!')
                 if func in high_functions:
-                    func_asm, retreg = high_functions[func](opr)
+                    func_asm = high_functions[func](opr)
+                    retreg = func + '.retval'
                     asm += func_asm
-                    final_asm, final_reg = evaluate_expr(expression[:position] + [retreg] + expression[position+1:])
+                    final_asm, final_reg = evaluate_expr(tokens[:position] + [Token(retreg)] + tokens[position+2:-1])
                     return (asm + final_asm, final_reg)
                 raise SyntaxError(f'Unable to call function {func}!')
+            #Indexing:
+            elif opr.bracket == '[':
+                index_expr = [x for x in opr]
+                index_asm, index_reg = evaluate_expr(index_expr, registers)
+                reg = data_sect.add_register(registers)
+                registers += 1
+                #Call a function to get the index:
+                fname = '_getindex'
+                func = inline_functions[fname]
+                new_asm = func([reg, item.data, index_reg])
+                #Add the assembly and re-evaluate the expression:
+                asm += index_asm + new_asm
+                final_expr = tokens[:position] + [Token(reg)] + tokens[position+2:-1]
+                final_asm, final_reg = evaluate_expr(final_expr)
+                return (asm + final_asm, final_reg)
+            else:
+                raise SyntaxError("Curly brackets cannot follow a symbol in an expression.")
+            
+                
         if opr.ttype != 'opr':
             raise SyntaxError(f'Invalid operator: {opr.data}')
+        #Get the operator's priority:
         oprio = prio[opr.data]
+        #If the operator's priority is higher than the current priority, update  it:
         if oprio > cprio:
             citem = item
             cprio = oprio
             copr = opr
             position += 2
         else:
+            #Lower priority operator; the operator takes effect.
             fname = ''
             if copr.data in operator_functions:
                 fname = operator_functions[copr.data]

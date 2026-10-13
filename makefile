@@ -4,12 +4,13 @@ lmas: assembler/lmas.cpp assembler/lmc.hpp
 lmas_debug: assembler/lmas.cpp assembler/lmas_debug.cpp assembler/lmc.hpp
 	g++ assembler/lmas_debug.cpp -o lmas_debug $(COMPILER_FLAGS)
 clean:
-	rm -rf lmas lmas_debug clean.lmc __pycache__ src/__pycache__
+	rm -rf lmas lmas_debug out.lmc __pycache__ src/__pycache__
 test:
 	for filename in examples/*.lms; do \
 		echo $$filename ; \
 		./lmcc $$filename -O ; \
+		yes 9 | ./lmas out.lmc ; \
 	done
 all: clean lmas lmas_debug
+	chmod a+x lmcc
 	echo "Built executables"
-

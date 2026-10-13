@@ -52,19 +52,30 @@ func main() {
 ```
 
 # Low-level
-The lowest level the compiler works with is Little Man Computer assembly. Some examples of the syntax used to make it more readable are:
+The lowest level the compiler works with is Little Man Computer assembly. Some examples of the syntax used to make output assembly more readable are:
 - Integer literals are written as `___int.<num> DAT <num>`
 - String literals have a label with `__string_<hash>` and then a series of data statements.
 - The first instruction is labeled `_start`, and is responsible for setting up a function call to `main()`.
 - Functions are labeled with their name. Their static variables are defined as `__func.<name>.<var>`.
 - All functions have a static `retval` and `retbranch`, used for returning values and control, respectively.
-
+## Low-level library
 Inline functions are defined in files in [/lib](/lib). You can write your own as long as you conform to the (fairly obvious) syntax, and save the file with `.lma` as the extension. When they are called, the assembly code is fitted with the arguments and then pasted into the main output.
 These functions can be called from user-defined functions, but do not have a return value.
 Some of the core functions defined in here include:
 - `print(num)` - Prints a number.
+- `flush()` - Prints a newline character.
 - `exit(code)` - Exits the program, with the assembler returning the specified exit code.
 
+You can write inline assembly functions in your LMC- code directly, if you follow the syntax, but they must strictly be procedures. Values are passed by reference, making inline functions ideal for low-level memory operations.
+
+An example of the syntax for inline functions is shown below:
+```
+asm flush() {
+	LDA 10;
+	OUT;
+}
+``` 
+Functions starting with underscores are intended for internal use by the standard library and should not be used in your code.
 # Key concepts
 This section explains how core concepts from other languages are handled in LMC-.
 ## Functions
@@ -73,6 +84,10 @@ To define a function, use the keyword `func`, then the function name, then any p
     c = a + b;
     print(c);
 }
+
+Since the tokeniser only looks for the symbol `func` to find functions, you are free to annotate your code with return types.
+
+Arguments are always passed by value.
 ```
 
 Values can be returned from a function by using the `return` keyword.
@@ -80,9 +95,9 @@ Values can be returned from a function by using the `return` keyword.
 Function calls work just like every other high-level programming language, but your arguments cannot be compound expressions - they must be variables or literals.
 
 ## Data types
-There is no strong typing system, but there are five distinct functional types of data, which each take up one mailbox.
+There is no strong typing system, but there are six distinct functional types of data, which each take up one mailbox.
 ### Integers
-Integer types are the most common. The Little Man Computer model is not clear on how to handle negatives, so don't use them if you want to stay true to the standard.
+Integer types are the most common. They are unsigned - attempting to store a negative variable causes an error with the VM.
 
 Positive integer literals are supported - e.g `a = 5`, and integers are stored with the label `__int.<value>`.
 
@@ -103,10 +118,14 @@ To print a character, use `printc(char)` or `putchar(char)`.
 ### Pointers
 Pointers are stored as integer values. To read or write from them, they are added to internal values to produce load or store machine code operations by functions.
 
-To read or write from a pointer, use `getchar(string, index)` or `setchar(string, index, char)`, which can be use for general-purpose R/W, despite the name,
+To read or write from a pointer, use slicing - e.g `array[index] = 3;`. In place operations like `+=` are not supported for arrays, but you can still use syntax such as `array[index] = array[index] + 1;`
 
 Pointer arithmetic with addition and subtraction is supported.
 
+#### Arrays
+To declare a static array, use the `array` keyword and specify how many mailboxes you wish to allocate - e.g `array buffer[16];`  The array is not garbage collected in any way, so use `memset(ptr, val, num)` to zero-initialise it if necessary. 
+
+Arrays are stored and passed to functions as pointers.
 #### Strings
 Similar to C, strings are simply arrays of characters ending in a null byte, or mailbox in this case, with a pointer to the first character.
 
@@ -138,9 +157,6 @@ The entry point of a program is always the function named `main()`. It must be d
 ## Memory allocation
 Dynamic memory allocation is done using [stack-based memory allocation](https://en.wikipedia.org/wiki/Stack-based_memory_allocation). To allocate memory, call `malloc(amount)` to allocate `amount` mailboxes on the stack and return a pointer to the allocated memory. To free it from the stack, call `free(amount)`.
 
-## Static arrays
-To declare a static array, use the `array` keyword and specify how many mailboxes you wish to allocate - e.g `array buffer[16];`  The array is not garbage collected in any way, so use `memset(ptr, val, num)` to zero-initialise it if necessary. 
-
 ## Preprocessing
 Macros can be defined - if you use the directive `#define FOO BAR`, all instances of a token with data `FOO` will be replaced by `BAR`.
 
@@ -162,16 +178,16 @@ The preprocessor will not include a file more than once when translating, and fu
 A complete list of standard library functions is shown below:
 ### Implicit
 - `print(num)`: Prints a number.
-- `flush()`: Prints a newline.
-- `printc(char)`: Prints a character.
-- `putchar(char)`: Same as above.
+- `flush()`: Prints a newline
 - `exit(code)`: Exits the program. The VM process should return the code to the operating system.
 
 ### Input/output
 These functions are defined in `<stdio.lmh>`.
+- `printc(char)`: Prints a character.
+- `putchar(char)`: Same as above.
 - `prints(string)`: Prints a string. Does not output newline characters unless they are in the string!
 - `printb(bool)`: Prints a boolean value (0 = false, anything else = true).
-- `input()`: Takes an integer input from the user; owing to the limitations of the LMC textual input is impossible.
+- `input()`: Takes an integer input from the user; owing to the limitations of the LMC textual input is impossible. A prompt of `->` is automatically printed.
 - `write(string, chars)`: Writes characters starting at the given pointer to standard output.
 
 ### Strings
@@ -179,7 +195,7 @@ These functions are defined in `<string.lmh>`.
 - `memcpy(dst, src, num)`: Copies memory from `src` to `dst`. Essentially equivalent to its C counterpart.
 - `memset(ptr, val, num)`: Direct memory manipulation. Again, essentially equivalent to C.
 - `strlen(string)`: Determines the length of a null-terminated string, ignoring the null character. e.g strlen("Hello") would evaluate to 5.
-- `strcmp(string1, string2)`: Compares two strings. Unlike C, it returns a boolean value reflecting whether or not the strings are equal.
+- `strcmp(string1, string2)`: Compares two strings. Unlike C, it returns a boolean value reflecting whether or not the strings are equal, since negative numbers are not supported.
 - `strcpy(dst, src)`: Copies a string from `src` to `dst`.
 - `strcat(dst, src)`: Concatenates the string `src` to the end of `dst`.
 - `getchar(string, index)`: Returns the character at the given string and index. Can also be used for general purpose memory reading.

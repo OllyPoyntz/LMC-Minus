@@ -1,11 +1,12 @@
 // Functions relating to input and output.
-
+#define printc _printc
 // Outputs a string:
 func prints(string) {
     _prints(string);
 }
 // Ensure that C-style functions can be used:
 #define puts prints
+#define putchar _printc
 // Take user input, similar to Python's input function:
 func input() {
     a = 0;
@@ -13,16 +14,16 @@ func input() {
     _input(a);
     return a;
 }
-// C compatibility:
+// C-style writing to stdout:
 func write(string, chars) {
     _write(string, chars);
 }
 // Outputs a boolean value:
 func printb(bool) {
-    outstr = "false";
+    outstr = "false\0true";
     if (bool) {
-        outstr = "true";
+        outstr += 6;
     }
-    _prints(outstr);
+    prints(outstr);
     flush();
 }

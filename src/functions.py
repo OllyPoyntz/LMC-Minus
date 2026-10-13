@@ -3,7 +3,7 @@ import json
 import os
 import sys
 from .lexer import Token, TokenList, tokenise
-from .lowlink import inline_functions, next_call
+from .lowlink import inline_functions, next_call, InlineFunction
 from .data import data_sect
 from .expr import evaluate_expr, high_functions
 from .optimise import optimise
@@ -103,7 +103,7 @@ def generate_asm(code, name, definition = False, debug = False):
                 asm += f'STA {name}.retval\n'
                 asm += f'BRA {name}.retbranch\n'
                 continue
-            if cexpr[0].ttype == 'sym' and isinstance(cexpr[1], TokenList):
+            if cexpr[0].ttype == 'sym' and isinstance(cexpr[1], TokenList) and cexpr[1].bracket == '(':
                 #Function call:
                 fname = cexpr[0].data
                 args = cexpr[1]
@@ -186,6 +186,8 @@ class HighLevelFunction:
         return generate_asm(self.code, self.name, True, self.debug)
     def call(self, args):
         '''Generates assembly for a function call.'''
+        if len(self.params) != len(args):
+            raise SyntaxError(f'Function {self} takes {len(self.params)} arguments but {len(args)} were given.')
         if not self.called:
             self.called = True
             asm = self.generate_asm()
@@ -220,10 +222,20 @@ def compile_code(code, filename, do_optimise = True, debug=False):
         code += x + '\n'
     asm= ''
     tokens = tokenise(code)
+    
     position = -1
     while position + 1 < len(tokens):
         position += 1
         ctoken = tokens[position]
+        #Inline function:
+        if ctoken.data == 'asm':
+            try:
+                fname, params, fcode = tokens[position+1:position+4]
+            except ValueError:
+                raise SyntaxError('Incomplete inline function declaration.')
+            func = InlineFunction(fname, params, fcode)
+            inline_functions[fname.data] = func
+        #High-level function:
         if ctoken.data == 'func':
             try:
                 fname, params, fcode = tokens[position+1:position+4]

@@ -25,6 +25,9 @@ func atoi(string) {
 // Converts an integer to a string, storing it in a buffer:
 func itoa(num, buffer) {
     digits = 0;
+    if (num == 0) {
+	digits = 1;
+    }
     num2 = num;
     while (num2 > 0) {
         digits += 1;
@@ -33,13 +36,13 @@ func itoa(num, buffer) {
     num2 = num;
     i = 0;
     while (i < digits) {
-        digit = '0' + (num2 % 10);
-        targetpos = digits - 1 - i;
-        setchar(buffer, targetpos, digit);
-        num2 /= 10;
         i += 1;
+        digit = '0' + (num2 % 10);
+        targetpos = digits - i;
+        buffer[targetpos] = digit;
+        num2 /= 10;
     }
-    setchar(buffer, digits, 0);
+    buffer[digits] = 0;
     return buffer;
 }
 // Performs a bubble sort on an array. Requires O(n^2) time.
@@ -47,4 +50,5 @@ func itoa(num, buffer) {
 func bsort(arr, length) {
     _bsort(arr, length);
 }
+// Most efficient sorting algorithm in the library:
 #define sort bsort

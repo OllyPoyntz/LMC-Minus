@@ -1,3 +1,4 @@
+//  Functions and a class emulating the Little Man Computer.
 #pragma once
 #include <iostream>
 #include <cstdlib>
@@ -31,6 +32,10 @@ void LDA(const int address, int* acc, int* ram, int* pc) {
 	*acc = ram[address];
 }
 void STA(const int address, int* acc, int* ram, int* pc) {
+	if (*acc < 0) {
+		std::cerr << "Unable to store negative value!" << std::endl;
+		exit(1);
+	}
 	ram[address] = *acc;
 }
 void BRA(const int address, int* acc, int* ram, int* pc) {
@@ -125,12 +130,17 @@ void print_instruction(const int opcode, const int operand) {
 template <size_t digits>
 class LMC {
 	private:
-	int ram[(size_t)round(pow(10, digits-1))];
+	int* ram;
 	int pc = 0;
 	int acc = 0;
 	public:
-	LMC<digits>() {
-		memset(ram, 0, sizeof(int) * (size_t)round(pow(10, digits-1)));
+	LMC() {
+		size_t membytes = sizeof(int) * (size_t)round(pow(10, digits-1));
+		ram = (int*)malloc(membytes);
+		memset(ram, 0, membytes);
+	}
+	~LMC() {
+		free(ram);
 	}
     // Loads the program into memory using memcpy():
 	void load_program(int* arr, const size_t program_size) {

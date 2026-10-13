@@ -1,1 +1,1 @@
-["prints", "puts", "printb", "input", "write", "malloc", "calloc", "free", "atoi", "itoa", "bsort", "sort", "memcpy", "memset", "strlen", "strcmp", "strcpy", "strcat", "setchar"]
+["prints", "puts", "putchar", "printc", "printb", "input", "write", "malloc", "calloc", "free", "atoi", "itoa", "bsort", "sort", "memcpy", "memset", "strlen", "strcmp", "strcpy", "strcat", "setchar"]

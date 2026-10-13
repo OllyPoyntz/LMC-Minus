@@ -152,35 +152,38 @@ asm _divnuminplace(reg, a, b) {
            STA reg;
            STA a;
 }
-asm setval(dst, src) {
+asm _setval(dst, src) {
 	LDA src;
 	STA dst;
 }
-asm loadptr(reg, ptr) {
-	LDA __base_load;
-	ADD ptr;
-	STA loadinstr;
-	loadinstr LDA loadinstr;
-	STA reg;
-}
-asm storeptr(ptr) {
+asm _storeptr(ptr, val) {
 	LDA __base_store;
 	ADD ptr;
 	STA loadinstr;
+        LDA val;
 	loadinstr STA loadinstr;
 }
-asm getptr(reg, var) {
-	loadinstr LDA var;
-	LDA loadinstr;
-	SUB __base_load;
-	STA reg;
-}
-asm getindex(reg, ptr, index) {
-    loadinstr LDA var;
-    LDA loadinstr;
+asm _getindex(reg, ptr, index) {
+    LDA index;
+    LDA ptr;
     ADD index;
-    STA loadinstr2;
-    loadinstr2 LDA ptr;
+    SUB __ram_size;
+    BRP 0;
+    ADD __ram_size;
+    ADD __base_load;
+    STA loadinstr;
+    loadinstr LDA ptr;
+    STA reg;
+}
+asm _storeindex(ptr, index) {
+    LDA ptr;
+    ADD index;
+    SUB __ram_size;
+    BRP 0;
+    ADD __ram_size;
+    ADD __base_store;
+    STA storeinstr;
+    storeinstr STA ptr;
 }
 asm _check_eq(reg, var1, var2) {
 	LDA 0;
@@ -282,4 +285,11 @@ asm _logic_AND(reg, var1, var2) {
     STA reg;
     return LDA 0;
 }
-
+asm _logic_NOT(reg, var) {
+    LDA var;
+    BRZ false;
+    true LDA 0;
+         BRA storeop;
+    false LDA 1;
+    storeop STA reg;
+}

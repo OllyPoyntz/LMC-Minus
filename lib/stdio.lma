@@ -23,11 +23,7 @@ asm _input(reg) {
 	INP;
 	STA reg;
 }
-asm printc(char) {
-    LDA char;
-    OTC;
-}
-asm puts(char) {
+asm _printc(char) {
     LDA char;
     OTC;
 }
