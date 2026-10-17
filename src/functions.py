@@ -245,7 +245,6 @@ def compile_code(code, filename, do_optimise = True, debug=False):
             except ValueError:
                 raise SyntaxError('Incomplete function declaration.')
             func = HighLevelFunction(fname.data, params, fcode, debug=debug)
-    print([f for f in high_functions] + [f for f in definitions])
     if 'main' not in high_functions:
         raise SyntaxError('Function \'main\' needs to be defined as an entry point!')
     #Fake call main() to generate relevant code:
