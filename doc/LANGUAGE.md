@@ -81,7 +81,8 @@ Functions starting with underscores are intended for internal use by the standar
 This section explains how core concepts from other languages are handled in LMC-.
 ## Functions
 To define a function, use the keyword `func`, then the function name, then any parameters in brackets, then the function's code inside curly brackets. Example:
-```func add_nums(a, b) {
+```
+func add_nums(a, b) {
     c = a + b;
     print(c);
 }
