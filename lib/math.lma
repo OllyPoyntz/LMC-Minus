@@ -1,0 +1,82 @@
+// Mathematical assembly functions
+asm _max(reg, a, b) {
+	LDA a;
+	SUB b;
+	BRP amax;
+	LDA b;
+	BRA storeop;
+	amax 	LDA a;
+	storeop	STA reg;
+}
+
+asm _min(reg, a, b) {
+	LDA a;
+	SUB b;
+	BRP bmin;
+	LDA a;
+	BRA storeop;
+	bmin 	LDA b;
+	storeop	STA reg;
+}
+asm _diff(reg, a, b) {
+	LDA a;
+	SUB b;
+	BRP return;
+	LDA b;
+	SUB a;
+	return STA reg;
+}
+asm _sum(reg, arr, length) {
+	LDA arr;
+	ADD __base_load;
+	STA loadop;
+	LDA length;
+	STA count;
+	LDA 0;
+	STA reg;
+	loop	LDA count;
+			BRZ return;
+			SUB 1;
+			STA count;
+
+	loadop 	LDA arr;
+			ADD reg;
+			STA reg;
+			
+			LDA loadop;
+			ADD 1;
+			STA loadop;
+			
+			BRA loop;
+	count DAT 0;
+	return LDA reg;
+}
+asm _sqrt(reg, num) {
+	LDA 0;
+	STA square;
+	LDA 0;
+	STA count;
+	LDA num;
+	BRZ return;
+	loop 	LDA count;
+			ADD 1;
+			STA count;
+			LDA square;
+			ADD count;
+			ADD count;
+			SUB 1;
+			STA square;
+			SUB num;
+			BRP checkp;
+	checkn	BRA loop;
+	checkp 	BRZ checkz;
+			LDA count;
+			SUB 1;
+			BRA return;
+	checkz  LDA count;
+			BRA return;
+	square DAT 0;
+	count DAT 0;
+
+	return STA reg;
+}

@@ -39,7 +39,7 @@ def optimise(asm, debug=False):
                     if splitline2[0] == 'LDA' and splitline2[1] == label:
                         splitcode.pop(x+1)
                         if debug:
-                            sys.stderr.write('Removed redundant load operation.\n')
+                            sys.stderr.write(f'Removed redundant load operation on "{splitline2[1]}"\n')
             x += 1
     #Remove unreferenced symbols:
     for _ in range(10):
@@ -58,7 +58,7 @@ def optimise(asm, debug=False):
     #Remove 'filler' load operations:
     for _ in range(3):
         x = 0
-        while x < len(splitcode):
+        while x + 1 < len(splitcode):
             splitline = splitcode[x].split(' ')
             if len(splitline) == 3 and splitline[1] == 'LDA':
                 splitline2 = splitcode[x+1].split(' ')
@@ -104,9 +104,10 @@ def optimise(asm, debug=False):
             if len(splitline) >= 2:
                 label = splitline[0]
                 if len(label) <= 36 and label != label.upper() and count_symbol(splitcode, label) == 1:
-                    splitcode.pop(x)
-                    if debug:
-                        sys.stderr.write(f'Removed unnecessary symbol "{label}"\n')
+                    if label not in ('main', '_start'):
+                        splitcode.pop(x)
+                        if debug:
+                            sys.stderr.write(f'Removed unnecessary symbol "{label}"\n')
             x += 1
     endcodesize = len(splitcode)
     print(f'Optimisation: {initcodesize} -> {endcodesize}')

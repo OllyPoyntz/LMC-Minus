@@ -3,3 +3,6 @@
 #include <stdlib.lmh>
 #include <string.lmh>
 #include <stdbool.lmh>
+#include <stddef.lmh>
+#include <math.lmh>
+#include <stack.lmh>

@@ -1,21 +1,7 @@
 // Standard library functions (mostly wrappers)
 #include <string.lmh>
-// Memory allocation using a stack-based method:
-func malloc(amount) {
-    ptr = 0;
-    _malloc(ptr, amount);
-    return ptr;
-}
-// Zero-initialised allocation:
-func calloc(amount) {
-    ptr = malloc(amount);
-    memset(ptr, 0, amount);
-    return ptr;
-}
-// Freeing allocated memory:
-func free(amount) {
-    _free(amount);
-}
+#include <stdio.lmh>
+#include <stack.lmh>
 // Converts a string to an integer:
 func atoi(string) {
     num = 0;
@@ -52,3 +38,15 @@ func bsort(arr, length) {
 }
 // Most efficient sorting algorithm in the library:
 #define sort bsort
+
+// Error handling:
+func throw(msg) {
+	prints(msg);
+	exit(1);
+}
+
+func assert(val) {
+	if (val == 0) {
+		throw("AssertionError\n");
+	}
+}

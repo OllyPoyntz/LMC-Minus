@@ -5,7 +5,7 @@ lmas_debug: assembler/lmas.cpp assembler/lmas_debug.cpp assembler/lmc.hpp
 	g++ assembler/lmas_debug.cpp -o lmas_debug $(COMPILER_FLAGS)
 clean:
 	rm -rf lmas lmas_debug out.lmc __pycache__ src/__pycache__
-test:
+test: lmas
 	for filename in examples/*.lms; do \
 		echo $$filename ; \
 		./lmcc $$filename -O ; \

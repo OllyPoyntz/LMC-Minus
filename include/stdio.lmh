@@ -1,5 +1,8 @@
 // Functions relating to input and output.
+
+// Printing a character is small enough to be inline:
 #define printc _printc
+
 // Outputs a string:
 func prints(string) {
     _prints(string);
@@ -14,10 +17,18 @@ func input() {
     _input(a);
     return a;
 }
+
+func inputs(buffer) {
+	prompt();
+	strlength = 0;
+	_inputs(strlength, buffer);
+	return strlength;
+}
 // C-style writing to stdout:
 func write(string, chars) {
     _write(string, chars);
 }
+
 // Outputs a boolean value:
 func printb(bool) {
     outstr = "false\0true";
@@ -26,4 +37,15 @@ func printb(bool) {
     }
     prints(outstr);
     flush();
+}
+
+// printf equivalent (unfortunately variadic args are not supported).
+// By far the longest function in pure assembly - over 70 lines!
+func printf(format, args) {
+	_printf(format, args);
+}
+
+// Stack based printf:
+func stackprintf(format) {
+	_stackprintf(format);
 }

@@ -1,28 +1,60 @@
 asm print(num) {
 	LDA num;
 	OUT;
+	LDA 10;
+	OTC;
 }
 asm _prints(string) {
 	LDA string;
 	ADD __base_load;
 	STA loop;
-	loop LDA string;
-	BRZ return;
-	OTC;
-	LDA loop;
-	ADD 1;
-	STA loop;
-	BRA loop;
-	return LDA string;
+	loop	LDA string;
+			BRZ return;
+			OTC;
+			LDA loop;
+			ADD 1;
+			STA loop;
+			BRA loop;
+
+	return 	LDA string;
 }
 asm flush() {
 	LDA 10;
 	OTC;
 }
+
 asm _input(reg) {
 	INP;
 	STA reg;
 }
+asm _inputs(reg, buf) {
+	LDA buf;
+	ADD __base_store;
+	STA storeop;
+	loop 	INP;
+		 	STA cchar;
+			BRZ return;
+			SUB 10;
+			BRZ return;
+			LDA cchar;
+	storeop	STA buf;
+			LDA chars;
+			ADD 1;
+			STA chars;
+			LDA storeop;
+			ADD 1;
+			STA storeop;
+			BRA loop;
+	cchar DAT 0;
+	chars DAT 0;
+	return 	LDA storeop;
+		   	STA store2;
+			LDA 0;
+	store2	STA buf;
+			LDA chars;
+			STA reg;
+}
+
 asm _printc(char) {
     LDA char;
     OTC;
@@ -43,12 +75,214 @@ asm _write(string, chars) {
             ADD 1;
             STA loadop;
             BRA loop;
-    DAT count 0;
-    return LDA 1;
+    count DAT 0;
+    return LDA count;
 }
 asm prompt() {
     LDA 45;
     OTC;
     LDA 62;
     OTC;
+}
+
+
+
+
+asm _printf(format, args) {
+	LDA format;
+	ADD __base_load;
+	STA loadop1;
+	LDA args;
+	ADD __base_load;
+	STA loadop2;
+	
+	loadop1	LDA format;
+			BRZ return;
+			STA cchar;
+			SUB 37;
+			BRZ percent;
+			LDA cchar;
+			OTC;
+			BRA next;
+
+	percent	LDA loadop1;
+			ADD 1;
+			STA loadchr;
+			STA loadop1;
+			LDA loadop2;
+			STA loaditm;
+			ADD 1;
+			STA loadop2;
+	loaditm	LDA args;
+			STA item;
+	loadchr	LDA cchar;
+			BRZ return;
+			SUB 37;
+			BRZ p_sign;
+			SUB 61;
+			BRZ p_bool;
+			SUB 1;
+			BRZ p_char;
+			SUB 1;
+			BRZ p_uint;
+			SUB 15;
+			BRZ p_cstr;
+			BRA next;
+	
+	p_sign	LDA 37;
+			OTC;
+			BRA next;
+
+	p_bool	LDA item;
+			BRZ b_false;
+			LDA 116;
+			OTC;
+			LDA 114;
+			OTC;
+			LDA 117;
+			OTC;
+			BRA print_e;
+	b_false	LDA 102;
+			OTC;
+			LDA 97;
+			OTC;
+			LDA 108;
+			OTC;
+			LDA 115;
+			OTC;
+	print_e	LDA 101;
+			OTC;
+			BRA next;
+	
+
+	p_char	LDA item;
+			OTC;
+			BRA next;
+	
+	p_uint	LDA item;
+			OUT;
+			BRA next;
+
+	p_cstr	LDA item;
+			ADD __base_load;
+			STA strldop;
+	strldop	LDA item;
+			BRZ next;
+			OTC;
+			LDA strldop;
+			ADD 1;
+			STA strldop;
+			BRA strldop;
+
+	next	LDA loadop1;
+			ADD 1;
+			STA loadop1;
+			BRA loadop1;
+
+	loadop2 LDA args;
+	cchar	DAT 0;
+	fchar 	DAT 0;
+	item DAT 0;
+	return LDA 0;
+}
+
+asm _stackprintf(format) {
+	LDA format;
+	ADD __base_load;
+	STA loadop1;
+	stklda LDA __stack_pos;
+	ADD stklda;
+	STA loadop2;
+	
+	loadop1	LDA format;
+			BRZ return;
+			STA cchar;
+			SUB 37;
+			BRZ percent;
+			LDA cchar;
+			OTC;
+			BRA next;
+
+	percent	LDA loadop1;
+			ADD 1;
+			STA loadchr;
+			STA loadop1;
+			LDA loadop2;
+			STA loaditm;
+			SUB 1;
+			STA loadop2;
+			LDA __stack_pos;
+			SUB 1;
+			STA __stack_pos;
+	loaditm	LDA 0;
+			STA item;
+	loadchr	LDA cchar;
+			BRZ return;
+			SUB 37;
+			BRZ p_sign;
+			SUB 61;
+			BRZ p_bool;
+			SUB 1;
+			BRZ p_char;
+			SUB 1;
+			BRZ p_uint;
+			SUB 15;
+			BRZ p_cstr;
+			BRA next;
+	
+	p_sign	LDA 37;
+			OTC;
+			BRA next;
+
+	p_bool	LDA item;
+			BRZ b_false;
+			LDA 116;
+			OTC;
+			LDA 114;
+			OTC;
+			LDA 117;
+			OTC;
+			BRA print_e;
+	b_false	LDA 102;
+			OTC;
+			LDA 97;
+			OTC;
+			LDA 108;
+			OTC;
+			LDA 115;
+			OTC;
+	print_e	LDA 101;
+			OTC;
+			BRA next;
+	
+
+	p_char	LDA item;
+			OTC;
+			BRA next;
+	
+	p_uint	LDA item;
+			OUT;
+			BRA next;
+
+	p_cstr	LDA item;
+			ADD __base_load;
+			STA strldop;
+	strldop	LDA item;
+			BRZ next;
+			OTC;
+			LDA strldop;
+			ADD 1;
+			STA strldop;
+			BRA strldop;
+
+	next	LDA loadop1;
+			ADD 1;
+			STA loadop1;
+			BRA loadop1;
+
+	loadop2 LDA __stack_pos;
+	cchar	DAT 0;
+	fchar 	DAT 0;
+	item DAT 0;
+	return LDA 0;
 }

@@ -1,0 +1,15 @@
+// Constants which are useful when programming
+#include <stdbool.lmh>
+// Null pointers:
+#define NULL __int.0
+#define NULLPTR __int.0
+
+// These are constants mainly used by assembly, but might be useful:
+#define RAM_SIZE __ram_size
+#define	BASE_LOAD __base_load
+#define BASE_STORE __base_store
+
+// This isn't a constant, but still a useful variable:
+#define STACK_POS __stack_pos
+
+

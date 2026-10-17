@@ -19,6 +19,17 @@ func strcpy(dst, src) {
     length = strlen(src) + 1;
     memcpy(dst, src, length);
 }
+func strncpy(dst, src, n) {
+	length = strlen(src);
+	copylength = 0;
+	_max(copylength, length, n);
+	memcpy(dst, src, copylength);
+}
+func strchr(string, n) {
+	ptr = 0;
+	_strchr(ptr, string, n);
+	return ptr;
+}
 func strcat(dst, src) {
     length = strlen(dst);
     newdst = dst + length;

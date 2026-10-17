@@ -48,8 +48,8 @@ class Token:
             #String literals use double quotes - e.g "0".
             #This is standard practice in C and other languages with separate character and string types.
             if string[0] == '\'':
-                self.ttype = 'chr'
-                self.data = string[1]
+                self.ttype = 'sym'
+                self.data = '__int.' + str(ord(string[1]))
             else:
                 self.ttype = 'str'
                 self.data = string[1:-1]

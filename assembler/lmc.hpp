@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
+#include "input.hpp"
 namespace lmc {
 
 int zint(const char* string) {
@@ -52,12 +53,10 @@ void BRZ(const int address, int* acc, int* ram, int* pc) {
 	}
 }
 void INP(const int address, int* acc, int* ram, int* pc) {
-	std::string buffer;
-    std::cin >> buffer;
-	*acc = zint(buffer.c_str());
+	*acc = read_input();
 }
 void OUT(const int address, int* acc, int* ram, int* pc) {
-	std::wcout << *acc << std::endl;
+	std::wcout << *acc;
 }
 void OTC(const int address, int* acc, int* ram, int* pc) {
 	wchar_t outchar = *acc;

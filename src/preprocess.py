@@ -20,6 +20,9 @@ def preprocess(code, filename, included_files = set(), debug=False):
         while oldline == line:
             oldline = line
             line = line.strip(' ').strip('\t')
+        splitline = line.split(' ')
+        while '' in splitline:
+            splitline.remove('')
         #Handle #endif directives:
         if line.startswith('#endif'):
             if preprocess_stack:
@@ -39,7 +42,6 @@ def preprocess(code, filename, included_files = set(), debug=False):
             continue
         #Handle #ifdef directives:
         if line.startswith('#ifdef'):
-            splitline = line.split(' ')
             if len(splitline) == 2:
                 macro = splitline[1]
                 preprocess_stack.append(macro in definitions)
@@ -47,7 +49,6 @@ def preprocess(code, filename, included_files = set(), debug=False):
             continue
         #Handle #ifndef directives:
         if line.startswith('#ifndef'):
-            splitline = line.split(' ')
             if len(splitline) == 2:
                 macro = splitline[0]
                 preprocess_stack.append(macro not in definitions)
@@ -55,7 +56,6 @@ def preprocess(code, filename, included_files = set(), debug=False):
             continue
         #Handle #define directives by adding them to a dictionary:
         if line.startswith('#define'):
-            splitline = line.split(' ')
             if len(splitline) == 3:
                 token1 = splitline[1]
                 token2 = splitline[2]
@@ -67,7 +67,6 @@ def preprocess(code, filename, included_files = set(), debug=False):
         #Handle #include directives by preprocessing the file and inserting the processed code.
         #Files are only included once; no need for header guards or 
         if line.startswith('#include '):
-            splitline = line.split(' ')
             if len(splitline) == 2:
                 file = splitline[1]
                 if file.startswith('<') and file.endswith('>'):

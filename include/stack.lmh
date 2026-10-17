@@ -1,0 +1,32 @@
+// Functions relating to the free store stack.
+#include <stddef.lmh>
+
+// Memory allocation using a stack-based method:
+func malloc(amount) {
+    ptr = 0;
+    _malloc(ptr, amount);
+    return ptr;
+}
+
+// Zero-initialised allocation:
+func calloc(amount) {
+    ptr = malloc(amount);
+    memset(ptr, 0, amount);
+    return ptr;
+}
+
+// Freeing allocated memory:
+func free(amount) {
+    _free(amount);
+}
+
+// Push a value onto the stack:
+func push(val) {
+	_push(val);
+}
+
+// Pop a value from the stack:
+func pop() {
+	_pop(__reg.0);
+	return __reg.0;
+}

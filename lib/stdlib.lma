@@ -52,10 +52,17 @@ asm _malloc(reg, amount) {
     ADD loadop;
     SUB __base_load;
 	SUB __ram_size;
-	BRP continue;
-	BRA 0;
+	BRP reset_stack;
+	BRA continue;
+	// If we run out of free space on the stack, loop back to the start:
+	reset 	LDA 1;
+		  	STA __stack_pos;
+			LDA loadop;
+			ADD 1;
+			BRA output;
+
 	continue ADD __ram_size;
-    STA reg;
+    output	STA reg;
     LDA __stack_pos;
     ADD amount;
     STA __stack_pos;

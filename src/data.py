@@ -13,8 +13,8 @@ class DataSection:
 __base_store STA _start
 __ram_size ADD _start
 '''
-        #Add four registers to start with. We can always add more and remove extras with the optimisation tool.
-        for x in range(4):
+        #Add two registers to start with. We can always add more and remove extras with the optimisation tool.
+        for x in range(2):
             self.add_var(f'__reg.{x}', 0)
     def add_var(self, varname, value=0):
         '''Adds a variable to the data section.'''

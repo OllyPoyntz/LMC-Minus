@@ -7,7 +7,7 @@ from .lowlink import inline_functions, next_call, InlineFunction
 from .data import data_sect
 from .expr import evaluate_expr, high_functions
 from .optimise import optimise
-from .preprocess import preprocess
+from .preprocess import preprocess, definitions
 keywords = ['return', 'if', 'while', 'array']
 with open(os.path.dirname(__file__)+'/stdlib_functions.json', 'r', encoding='utf-8') as f:
     data = f.read()
@@ -149,6 +149,9 @@ def generate_asm(code, name, definition = False, debug = False):
         cexpr.append(ctoken)
     if definition:
         asm += name + '.retbranch BRA __int.0\n'
+        #Ensure we exit properly from main():
+        if name == 'main':
+            asm += inline_functions['exit'](['main.retval'])
     data_sect.add_integers(asm)
     return asm
 class HighLevelFunction:
@@ -242,10 +245,12 @@ def compile_code(code, filename, do_optimise = True, debug=False):
             except ValueError:
                 raise SyntaxError('Incomplete function declaration.')
             func = HighLevelFunction(fname.data, params, fcode, debug=debug)
+    print([f for f in high_functions] + [f for f in definitions])
     if 'main' not in high_functions:
         raise SyntaxError('Function \'main\' needs to be defined as an entry point!')
     #Fake call main() to generate relevant code:
-    asm = '_start ' + high_functions['main']([]) + 'LDA main.retval\nHLT\n' + data_sect.data
+    high_functions['main']([])
+    asm = '_start BRA main\n' + data_sect.data
     asm += '__stack_pos DAT 1\n'
     if do_optimise:
         asm = optimise(asm, debug)

@@ -1,0 +1,25 @@
+asm _push(val) {
+	loadop LDA __stack_pos;
+	ADD 1;
+	STA __stack_pos;
+	ADD __base_store;
+	SUB __base_load;
+	ADD loadop;
+	STA storeop;
+	LDA val;
+	storeop STA 0;
+	LDA __stack_pos;
+}
+
+asm _pop(reg) {
+	loadop LDA __stack_pos;
+	ADD loadop;
+	STA loadop2;
+	
+	loadop2 LDA 0;
+			STA	reg;
+	LDA __stack_pos;
+	SUB 1;
+	STA __stack_pos;
+}
+	

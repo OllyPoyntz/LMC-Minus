@@ -1,0 +1,138 @@
+// Mathematical functions.
+#include <stack.lmh>
+#include <string.lmh>
+
+// Powers:
+func pow(a, b) {
+	num = 1;
+	while (b > 0) {
+		num *= a;
+	}
+	return a;
+}
+
+// Square roots:
+func sqrt(num) {
+	root = 0;
+	_sqrt(root, num);
+	return root;
+}
+// Absolute difference:
+func diff(a, b) {
+	d = 0;
+	_diff(d, a, b);
+	return d;
+}
+
+// Maximum of two numbers:
+func max(a, b) {
+	maxnum = 0;
+	_max(maxnum, a, b);
+	return maxnum;
+}
+func min(a, b) {
+	minnum = 0;
+	_min(minnum, a, b);
+	return minnum;
+}
+
+// Statistics-ish functions:
+func sum(arr, length) {
+	total = 0;
+	_sum(total, arr, length);
+	return total;
+}
+
+func mean(arr, length) {
+	total = sum(arr, length);
+	return total / length;
+}
+
+func median(arr, length) {
+	buf = malloc(length);
+	memcpy(buf, arr, length);
+	sort(buf, length);
+	if (length % 2 == 1) {
+		pos = length / 2;
+		item = buf[pos];
+		free(length);
+		return item;
+	}
+	pos = length / 2;
+	pos2 = pos - 1;
+	item = (buf[pos] + buf[pos2]) / 2;
+	free(length);
+	return item;
+}
+
+func mode(arr, length) {
+	buf = malloc(length);
+	memcpy(buf, arr, length);
+	sort(buf, length);
+	
+	item = 0;
+	citem = buf[0];
+	maxitem = 0;
+	count = 0;
+	maxcount = 0;
+	pos = 0;
+	while (pos < length) {
+		item = buf[pos];
+		if (item == citem) {
+			count += 1;
+		}
+		if (item != citem) {
+			if (count > maxcount) {
+				maxcount = count;
+				maxitem = citem;
+			}
+			citem = item;
+			count = 1;
+		}
+		pos += 1;
+	}
+	free(length);
+	return maxitem;
+}
+
+// Greatest common divisor/factor:	
+func gcd(a, b) {
+	highest_factor = 1;
+	if ((a < 2) || (b < 2)) {
+		return 1;
+	}
+	i = 1;
+	small = min(a, b);
+	while (i <= small) {
+		if ((a % i) == 0) {
+			if ((b % i) == 0) {
+				highest_factor = i;
+			}
+		}
+		i += 1;
+	}
+	return highest_factor;
+}
+
+// Lowest common multiple:
+func lcm(a, b) {
+	factor = gcd(a, b);
+	num = a / factor;
+	num *= b;
+	return num;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
