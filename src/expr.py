@@ -148,7 +148,7 @@ STA __ptr
                 raise SyntaxError(f'Undefined variable: \"{item.data}\"')
         opr = tokens[position + 1]
         if item.ttype != 'sym' and not isinstance(item, TokenList):
-            raise SyntaxError(f'Unexpected token: "{item.data}"')
+            raise SyntaxError(f'Unexpected token "{item.data}" at position {position+1} in expression!')
         #Operator is a TokenList - either a function call or a 
         if isinstance(opr, TokenList):
             #Function call:

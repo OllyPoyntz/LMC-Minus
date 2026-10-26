@@ -8,7 +8,7 @@ from .data import data_sect
 from .expr import evaluate_expr, high_functions
 from .optimise import optimise
 from .preprocess import preprocess, definitions
-keywords = ['return', 'if', 'while', 'array']
+keywords = ['return', 'if', 'while', 'array', 'pointer']
 with open(os.path.dirname(__file__)+'/stdlib_functions.json', 'r', encoding='utf-8') as f:
     data = f.read()
 stdlib_functions = json.loads(data)
@@ -70,6 +70,26 @@ def generate_asm(code, name, definition = False, debug = False):
             asm += f'__while_end_{callid} LDA __int.0\n'
             cexpr = []
             position += 2
+            continue
+        #Pointer statement:
+        if ctoken.data == 'pointer':
+            #Error handling:
+            if position + 2 >= len(code):
+                raise SyntaxError('Incomplete array declaration.')
+            if code[position+1].ttype != 'sym':
+                raise SyntaxError(f'Invalid pointer name "{code[position+1].ttype}"')
+            if not isinstance(code[position+2], TokenList):
+                raise SyntaxError('Pointer declaration requires a single bracketed variable.')
+            if len(code[position+2]) != 1 or code[position+2][0].ttype != 'sym':
+                raise SyntaxError('Pointer declaration requires a single bracketed variable.')
+            
+            ptrvar = code[position+1].data
+            data_sect.add_var(ptrvar)
+            srcvar = code[position+2][0].data
+            #Use an inline function call to get a pointer:
+            asm += inline_functions['_getptr']([ptrvar, srcvar])
+            position += 3
+            cexpr = []
             continue
         #Array statement:
         if ctoken.data == 'array':
@@ -189,12 +209,14 @@ class HighLevelFunction:
         return generate_asm(self.code, self.name, True, self.debug)
     def call(self, args):
         '''Generates assembly for a function call.'''
+        #Note:  The expense for a high-level function is p(2n + 5) + l for a function with n arguments called p times, or  (2n+4) with optimisations.
+        #       The expense for a low-level function is  p(n + l), where l is the number of lines of assembly in the function.
         if len(self.params) != len(args):
             raise SyntaxError(f'Function {self} takes {len(self.params)} arguments but {len(args)} were given.')
         if not self.called:
             self.called = True
             asm = self.generate_asm()
-            data_sect.data += asm
+            data_sect.add_function(asm)
         callid = next_call()
         asm = ''
         #Load args into the function's parameters:
@@ -249,7 +271,7 @@ def compile_code(code, filename, do_optimise = True, debug=False):
         raise SyntaxError('Function \'main\' needs to be defined as an entry point!')
     #Fake call main() to generate relevant code:
     high_functions['main']([])
-    asm = '_start BRA main\n' + data_sect.data
+    asm = '_start BRA main\n' + data_sect.dumps()
     asm += '__stack_pos DAT 1\n'
     if do_optimise:
         asm = optimise(asm, debug)

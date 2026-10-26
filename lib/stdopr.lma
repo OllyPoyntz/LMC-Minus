@@ -163,6 +163,12 @@ asm _storeptr(ptr, val) {
         LDA val;
 	loadinstr STA loadinstr;
 }
+asm _getptr(reg, val) {
+	loadop LDA val;
+	LDA loadop;
+	SUB __base_load;
+	STA reg;
+}
 asm _getindex(reg, ptr, index) {
     LDA index;
     LDA ptr;

@@ -117,7 +117,9 @@ Characters are also stored as integers, encoded using UTF-8. They support all of
 To print a character, use `printc(char)` or `putchar(char)`.
 
 ### Pointers
-Pointers are stored as integer values. To read or write from them, they are added to internal values to produce load or store machine code operations by functions.
+Pointers are stored as integer values. They are added to internal values to produce load or store machine code operations by functions.
+
+You can declare a pointer by using a pointer statement - e.g  `pointer foo(bar)` creates a pointer named  `foo` to the variable `bar`. 
 
 To read or write from a pointer, use slicing - e.g `array[index] = 3;`. In place operations like `+=` are not supported for arrays, but you can still use syntax such as `array[index] = array[index] + 1;`
 

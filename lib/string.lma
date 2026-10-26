@@ -54,6 +54,27 @@ asm _strcmp(reg, string1, string2) {
     return LDA equal;
            STA reg;
 }
+asm _strcpy(dst, src) {
+	LDA dst;
+	ADD __base_store;
+	STA storeop;
+	LDA src;
+	ADD __base_load;
+	STA loadop;
+
+	loadop 	LDA src;
+	storeop STA dst;
+			BRZ return;
+			LDA loadop;
+			ADD 1;
+			STA loadop;
+			LDA storeop;
+			ADD 1;
+			STA storeop;
+			BRA loadop;
+	return 	LDA 0;
+}s
+			
 asm _strchr(reg, string, chr) {
 	LDA string;
 	ADD __base_load;

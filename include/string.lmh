@@ -16,8 +16,7 @@ func strcmp(string1, string2) {
     return strings_equal;
 }
 func strcpy(dst, src) {
-    length = strlen(src) + 1;
-    memcpy(dst, src, length);
+	_strcpy(dst, src);
 }
 func strncpy(dst, src, n) {
 	length = strlen(src);

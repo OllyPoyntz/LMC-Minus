@@ -7,21 +7,6 @@
 #include "input.hpp"
 namespace lmc {
 
-int zint(const char* string) {
-    // Converts a string which may start with zeroes into an integer:
-	size_t pos = 0;
-	const size_t length = strlen(string);
-	while (string[pos] == '0') {
-		pos++;
-		if (pos == length) {
-			break;
-		}
-	}
-	if (pos == length) {
-		return 0;
-	}
-	return atoi(string + pos);
-}
 // Functions emulating the instructions:
 void ADD(const int address, int* acc, int* ram, int* pc) {
 	*acc += ram[address];

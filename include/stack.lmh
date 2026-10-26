@@ -27,6 +27,7 @@ func push(val) {
 
 // Pop a value from the stack:
 func pop() {
-	_pop(__reg.0);
-	return __reg.0;
+	a = 0;
+	_pop(a);
+	return a;
 }

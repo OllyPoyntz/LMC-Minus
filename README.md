@@ -24,7 +24,7 @@ func main() {
 All directories in the project are listed below:
 - [assembler](/assembler): C++ code implementing the assembler/VM.
 - [doc](/doc): Documentation.
-- [examples](/examples): Code snippets showing off the features of the langugage.
+- [examples](/examples): Code snippets showing off the features of the language.
 - [include](/include): LMC- header files which constitute the language's standard library.
 - [lib](/lib): Lower-level functions written in a slight dialect of LMC assembly.
 - [src](/src): Python source code for the actual compiler.

@@ -12,11 +12,16 @@ def next_call():
     global callid
     callid = hashlib.sha1(callid.encode('utf-8')).hexdigest()
     return callid
+#List of mneumonics in Little Man Assembly:
 mneumonics = ['ADD', 'SUB', 'LDA', 'STA', 'STO', 'BRA', 'BRZ', 'BRP','INP', 'OUT', 'OTC', 'HLT', 'COB', 'DAT']
+#A class is used to represent inline functions:
 class InlineFunction:
     '''Class representing an inline assembly function.'''
+    #String representing the function name:
     name = ''
+    #The parameters the function takes:
     params = []
+    #A list of the symbols comprising the function.
     code = []
     def __init__(self, fname, params, assembly):
         self.name = fname.data
@@ -33,17 +38,21 @@ class InlineFunction:
     def call(self, params) -> str:
         '''Generates inline assembly to call the function.'''
         next_call()
+        #Wrong number of arguments:
         if len(params) != len(self.params):
-            raise ValueError(f'{self} takes {len(self.params)} arguments but {len(params)} were given. ({params})')
+            raise SyntaxError(f'{self} takes {len(self.params)} arguments but {len(params)} were given. ({params})')
         code2 = copy.deepcopy(self.code)
+        #Replace parameters in the assembly with the arguments:
         for x in code2:
             if x.data in self.params:
                 x.data = params[self.params.index(x.data)]
+        #Output assembly:
         asm = ''
 
         pos = -1
         for x in code2:
             pos += 1
+            #Semicolons indicate the end of a statement:
             if x.data == ';':
                 asm = asm + '\n'
             else:
@@ -55,12 +64,16 @@ class InlineFunction:
                 if x.ttype == 'chr' and code2[pos-1].data != 'DAT':
                     x.data = '__int.' + str(ord(x.data))
                     x.ttype = 'sym'
+                #Ensure that variables are local:
                 if x.ttype == 'sym' and x.data not in params and x.data not in mneumonics and not x.data.startswith('__'):
                     x.data = '__' + self.name + '_' + callid + '.' + x.data
+                #Just put the symbol in the assembly:
                 asm += x.data + ' '
         return asm
+    #Syntactical sugar so that the function can be called like a Python one:
     def __call__(self, params) -> str:
         return self.call(params)
+#The standard library (lib_lmc-?) is loaded when this module is imported:
 def parse_lib(code) -> dict:
     '''Parses inline assembly into a dictionary of functions.'''
     tokens = tokenise(code)
@@ -75,8 +88,10 @@ def parse_lib(code) -> dict:
             continue
         position += 1
     return functions
+#Dictionary mapping the name to the function:
 inline_functions = {}
 libdir = os.path.dirname(os.path.dirname(__file__)) + '/lib'
+#Load all .lma (Little Man Assembly) files from the lib directory:
 libraries =  [x for x in os.listdir(libdir) if x.endswith('.lma')]
 for x in libraries:
     with open(libdir + '/' + x, 'r', encoding='utf-8') as f:

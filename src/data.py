@@ -2,10 +2,11 @@
 from .lexer import Token, tokenise
 class DataSection:
     '''Class which handles the creation of a data section for assembly.'''
-    data = ''
     def __init__(self):
         #Actual data, as a string:
-        self.data = ''
+        self.data = 'section.data DAT 0\n'
+        #Equivalent of a .text section:
+        self.text = 'section.text DAT 0\n'
         #Set of existing variables so that we can avoid adding duplicates:
         self.vars = set()
         #Constants that are used by assembly functions (and sometimes high-level programs):
@@ -67,8 +68,13 @@ SUB __base_load
 STA {name}
 '''
         return ptrasm
-
+    def add_function(self, txt):
+        '''Adds a function to the text section.'''
+        self.text += txt
     def __repr__(self):
-        return 'DataSection:\n' + self.data
+        return 'DataSection:\n' + self.data + self.text
+    def dumps(self):
+        '''Return the data section in a textual format.'''
+        return self.data + self.text
 data_sect = DataSection()
 data_sect.add_register(0)
