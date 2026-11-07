@@ -1,42 +1,94 @@
 // String (and general memory) operations:
+#include <stddef.lmh>
+
+// Memory copying:
 func memcpy(dst, src, num) {
     _memcpy(dst, src, num);
 }
+
+// Setting the value of a block of memory:
 func memset(ptr, val, num) {
-    _memset(ptr, src, num);
+    _memset(ptr, val, num);
 }
+
+// Length of a null-terminated string (NTS):
 func strlen(string) {
     length = 0;
     _strlen(length, string);
     return length;
 }
+
+// Comparison of two NTSes to see if they are equal:
 func strcmp(string1, string2) {
     strings_equal = 0;
     _strcmp(strings_equal, string1, string2);
     return strings_equal;
 }
+
+// Copying one NTS into another:
 func strcpy(dst, src) {
-	_strcpy(dst, src);
+    _strcpy(dst, src);
 }
+
+// Copying at most n bytes of a NTS:
 func strncpy(dst, src, n) {
-	length = strlen(src);
-	copylength = 0;
-	_max(copylength, length, n);
-	memcpy(dst, src, copylength);
+    length = strlen(src);
+    copylength = 0;
+    _max(copylength, length, n);
+    memcpy(dst, src, copylength);
 }
+
+// Finding the first occurrence of a character in a NTS:
 func strchr(string, n) {
-	ptr = 0;
-	_strchr(ptr, string, n);
-	return ptr;
+    ptr = 0;
+    _strchr(ptr, string, n);
+    return ptr;
 }
+
+// Concatenating a NTS onto the end of another:
 func strcat(dst, src) {
     length = strlen(dst);
     newdst = dst + length;
     strcpy(newdst, src);
 }
+
+// Direct read-write functions (obsolete thanks to indexing):
 func getchar(string, index) {
     char = 0;
     _getchar(char, string, index);
     return char;
 }
 #define setchar _setchar
+
+// Tokenisation function (works the same as C):
+func strtok(string, delim) {
+    a = NULL;
+    _strtok(a, string, delim, static_var);
+    return a;
+
+    static_var = 0;
+}
+
+// Number of characters in a NTS:
+func strcount(string, chr) {
+    a = 0;
+    _strcount(a, string, chr);
+    return a;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,7 +1,59 @@
+// String and memory-related functions:
+
+// Copies memory from src to dst:
+asm _memcpy(dst, src, num) {
+    LDA dst;
+    ADD __base_store;
+    STA storeop;
+    LDA src;
+    ADD __base_load;
+    STA loadop;
+    LDA num;
+    STA count;
+    loop    LDA count;
+            BRZ return;
+            SUB 1;
+            STA count;
+    loadop  LDA src;
+    storeop STA dst;
+            LDA loadop;
+            ADD 1;
+            STA loadop;
+            LDA storeop;
+            ADD 1;
+            STA storeop;
+            BRA loop;
+    count DAT 0;
+    return LDA 0;
+}
+
+// Sets mailboxes starting at ptr to a given value.
+// Useful for resetting an array or allocated memory:
+asm _memset(ptr, val, num) {
+    LDA ptr;
+    ADD __base_store;
+    STA storeop;
+    LDA num;
+    STA count;
+    loop    LDA count;
+            BRZ return;
+            SUB 1;
+            STA count;
+            LDA val;
+    storeop STA ptr;
+            LDA storeop;
+            ADD 1;
+            STA storeop;
+            BRA loop;
+    count DAT 0;
+    return LDA 0;
+}
+
+// Determines the length of a null-terminated string, storing it in reg:
 asm _strlen(reg, string) {
-	LDA string;
-	ADD __base_load;
-	STA loop;
+    LDA string;
+    ADD __base_load;
+    STA loop;
     LDA 0;
     STA count;
     loop LDA string;
@@ -17,6 +69,8 @@ asm _strlen(reg, string) {
     return LDA count;
            STA reg;
 }
+
+// Determines whether or not two strings are equal:
 asm _strcmp(reg, string1, string2) {
     LDA string1;
     ADD __base_load;
@@ -54,46 +108,52 @@ asm _strcmp(reg, string1, string2) {
     return LDA equal;
            STA reg;
 }
-asm _strcpy(dst, src) {
-	LDA dst;
-	ADD __base_store;
-	STA storeop;
-	LDA src;
-	ADD __base_load;
-	STA loadop;
 
-	loadop 	LDA src;
-	storeop STA dst;
-			BRZ return;
-			LDA loadop;
-			ADD 1;
-			STA loadop;
-			LDA storeop;
-			ADD 1;
-			STA storeop;
-			BRA loadop;
-	return 	LDA 0;
-}s
-			
+// Copies string src into the buffer at dst.
+// Not the safest function, sadly:
+asm _strcpy(dst, src) {
+    LDA dst;
+    ADD __base_store;
+    STA storeop;
+    LDA src;
+    ADD __base_load;
+    STA loadop;
+
+    loadop     LDA src;
+    storeop STA dst;
+            BRZ return;
+            LDA loadop;
+            ADD 1;
+            STA loadop;
+            LDA storeop;
+            ADD 1;
+            STA storeop;
+            BRA loadop;
+    return     LDA 0;
+}
+
+// Searches a string for a given character, returning a pointer to it (or NULL if the character isn't present):         
 asm _strchr(reg, string, chr) {
-	LDA string;
-	ADD __base_load;
-	STA loadop;
-	loadop 	LDA string;
-		   	BRZ nullchr;
-			SUB chr;
-			BRZ return;
-			
-			LDA loadop;
-			ADD 1;
-			STA loadop;
-			BRA loadop;
-	nullchr LDA __base_load;
-			STA loadop;
-	return 	LDA loadop;
-			SUB __base_load;
-			STA reg;
-}	
+    LDA string;
+    ADD __base_load;
+    STA loadop;
+    loadop     LDA string;
+               BRZ nullchr;
+            SUB chr;
+            BRZ return;
+            
+            LDA loadop;
+            ADD 1;
+            STA loadop;
+            BRA loadop;
+    nullchr LDA __base_load;
+            STA loadop;
+    return     LDA loadop;
+            SUB __base_load;
+            STA reg;
+}
+
+// Reads a character from a string at the given index:
 asm _getchar(reg, string, index) {
     LDA string;
     ADD index;
@@ -102,6 +162,7 @@ asm _getchar(reg, string, index) {
     loadop2 LDA string;
     STA reg;
 }
+// Modifies a character in a string at the given index:
 asm _setchar(string, index, char) {
     LDA string;
     ADD index;
@@ -110,3 +171,95 @@ asm _setchar(string, index, char) {
     LDA char;
     storeop STA string;
 }
+
+// Tokenises a string, similar to strtok() in C:
+asm _strtok(reg, string, delim, static_ptr) {
+    LDA string;
+    BRZ prep;
+    STA static_ptr;
+    
+    prep    LDA static_ptr;
+            ADD __base_load;
+            STA loadop;
+            STA loadop2;
+    loadop2    LDA static_ptr;
+            BRZ retnull;
+    loadop    LDA static_ptr;
+            BRZ nullchr;
+            SUB delim;
+            BRZ rtoken;
+            LDA loadop;
+            ADD 1;
+            STA loadop;
+            BRA loadop;
+    
+    nullchr    LDA static_ptr;
+            STA reg;
+            LDA loadop;
+            SUB __base_load;
+            STA static_ptr;
+            BRA return;
+    retnull    LDA 0;
+            STA reg;
+            BRA return;
+
+    rtoken    LDA static_ptr;
+            STA reg;
+            LDA loadop;
+            SUB __base_load;
+            ADD 1;
+            STA static_ptr;
+            SUB 1;
+            ADD __base_store;
+            STA storeop;
+            LDA 0;
+    storeop    STA static_ptr;
+    return LDA 0;
+}            
+    
+// Counts the number of occurrences of chr in the string:
+asm _strcount(reg, string, chr) {
+    LDA string;
+    ADD __base_load;
+    STA loadop;
+    LDA 0;
+    STA reg;
+    
+    loadop    LDA string;
+            BRZ return;
+            SUB chr;
+            BRZ incr;
+            BRA next;
+    incr    LDA reg;
+            ADD 1;
+            STA reg;
+    next    LDA loadop;
+            ADD 1;
+            STA loadop;
+            BRA loadop;
+    
+    return    LDA 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

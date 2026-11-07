@@ -1,0 +1,10 @@
+#include <all.lmh>
+func main() {
+    a = "_start BRA main";
+    
+    token = strtok(a, ' ');
+    while (token != NULL) {
+        printf("%s\n", token);
+        token = strtok(NULL, ' ');
+    }
+}

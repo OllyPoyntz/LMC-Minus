@@ -1,0 +1,6 @@
+// Alternative macros for logical operators:
+
+#define and &&
+#define or ||
+#define not !
+#define xor ^^

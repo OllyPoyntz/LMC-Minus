@@ -13,6 +13,7 @@ class DataSection:
         self.data += '''__base_load LDA _start
 __base_store STA _start
 __ram_size ADD _start
+__errno DAT 0
 '''
         #Add two registers to start with. We can always add more and remove extras with the optimisation tool.
         for x in range(2):

@@ -1,18 +1,21 @@
 // Standard library functions (mostly wrappers)
 #include <string.lmh>
 #include <stdio.lmh>
+// A lot of functions listed under <stdlib.lmh> are actually in stack.lmh because they are needed in other parts of the standard library: 
 #include <stack.lmh>
+
 // Converts a string to an integer:
 func atoi(string) {
     num = 0;
     _atoi(num, string);
     return num;
 }
+
 // Converts an integer to a string, storing it in a buffer:
 func itoa(num, buffer) {
     digits = 0;
     if (num == 0) {
-	digits = 1;
+    digits = 1;
     }
     num2 = num;
     while (num2 > 0) {
@@ -31,22 +34,25 @@ func itoa(num, buffer) {
     buffer[digits] = 0;
     return buffer;
 }
+
 // Performs a bubble sort on an array. Requires O(n^2) time.
-// (Bubble sort is by far the easiest sorting algorithm to implement, especially in assembly)
+// (Bubble sort is by far the easiest sorting algorithm to implement, especially in assembly):
 func bsort(arr, length) {
     _bsort(arr, length);
 }
+
 // Most efficient sorting algorithm in the library:
 #define sort bsort
 
 // Error handling:
 func throw(msg) {
-	prints(msg);
-	exit(1);
+    prints(msg);
+    exit(1);
 }
 
+// Assertion of a boolean statement:
 func assert(val) {
-	if (val == 0) {
-		throw("AssertionError\n");
-	}
+    if (val == 0) {
+        throw("AssertionError\n");
+    }
 }

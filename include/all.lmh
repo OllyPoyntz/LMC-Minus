@@ -1,8 +1,13 @@
 // Catch-all header that includes everything as dependencies.
+#include <errno.lmh>
+#include <math.lmh>
+#include <operator.lmh>
+#include <stack.lmh>
+#include <stdbool.lmh>
+#include <stddef.lmh>
 #include <stdio.lmh>
 #include <stdlib.lmh>
 #include <string.lmh>
-#include <stdbool.lmh>
-#include <stddef.lmh>
-#include <math.lmh>
-#include <stack.lmh>
+
+
+

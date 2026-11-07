@@ -2,7 +2,7 @@
 import argparse
 import sys
 from .functions import compile_code
-
+from .preprocess import preprocess
 def main():
     '''Main entry point.'''
     #Argument parser:
@@ -12,8 +12,9 @@ def main():
     #Outfile to write code to:
     parser.add_argument('-o', '--outfile', type=str, help='Outfile to write assembly to (default out.lmc)')
     parser.add_argument('-O', '--optimise', help='Optimise the output by removing unnecessary statements.', action='store_true')
-    #Debug mode:
+    #Debug options:
     parser.add_argument('-d', '--debug', help='Prints debug information if applicable.', action='store_true')
+    
     args = parser.parse_args(sys.argv[1:])
 
     source = args.file
@@ -32,13 +33,17 @@ def main():
     outfile = args.outfile
     if outfile is None:
         outfile = 'out.lmc'
+
+
     #Stuff to avoid traceback:
     exceptiontype = None
     exceptiondata = None
     if not args.debug:
         sys.tracebacklimit = -1
+
+    #Compile the code:
     try:
-        compiled_code = compile_code(code, source, args.optimise, args.debug)
+        compiled_code = compile_code(code, source, do_optimise = args.optimise, debug = args.debug)
     except Exception as e:
         if args.debug:
             raise(e)

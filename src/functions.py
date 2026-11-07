@@ -2,13 +2,13 @@
 import json
 import os
 import sys
-from .lexer import Token, TokenList, tokenise
+from .lexer import Token, TokenList, tokenise, reserved
 from .lowlink import inline_functions, next_call, InlineFunction
 from .data import data_sect
 from .expr import evaluate_expr, high_functions
 from .optimise import optimise
 from .preprocess import preprocess, definitions
-keywords = ['return', 'if', 'while', 'array', 'pointer']
+keywords = ['return', 'if', 'while', 'array', 'pointer', 'func', 'asm', 'vfunc']
 with open(os.path.dirname(__file__)+'/stdlib_functions.json', 'r', encoding='utf-8') as f:
     data = f.read()
 stdlib_functions = json.loads(data)
@@ -122,6 +122,7 @@ def generate_asm(code, name, definition = False, debug = False):
                 asm += f'LDA {reg}\n'
                 asm += f'STA {name}.retval\n'
                 asm += f'BRA {name}.retbranch\n'
+                cexpr = []
                 continue
             if cexpr[0].ttype == 'sym' and isinstance(cexpr[1], TokenList) and cexpr[1].bracket == '(':
                 #Function call:
@@ -179,18 +180,22 @@ class HighLevelFunction:
     name = ''
     params = []
     code = []
-    is_ptr = {}
     def __init__(self, fname, params, fcode, debug=False):
         self.name = fname
         self.params = list(params)
         self.params = symbolise(self.params, self.name)
         self.code = list(fcode)
-        self.code = symbolise(self.code, self.name)
+        self.symbolised = False
         self.debug = debug
-        if fname not in high_functions:
+        if fname not in high_functions and fname not in inline_functions:
             high_functions[fname] = self
         else:
-            raise SyntaxError(f'Multiple definitions of function {fname}')
+            raise SyntaxError(f'Multiple definitions of function "{fname}"')
+        if fname in reserved:
+            raise SyntaxError(f'Symbol "{fname}" is reserved for internal use.')
+        if fname.startswith('__'):
+            raise SyntaxError(f'Function name "{fname}" is invalid as double underscores are reserved for internal use.')
+        
         self.called = False
     def __repr__(self):
         output = f'{self.name}('
@@ -203,6 +208,9 @@ class HighLevelFunction:
         return output
     def generate_asm(self):
         '''Generates assembly that defines the function.'''
+        if not self.symbolised:
+            self.code = symbolise(self.code, self.name)
+            self.symbolised = True
         for x in self.params:
             data_sect.add_var(x.data)
         data_sect.add_var(self.name + '.retval')
@@ -239,8 +247,80 @@ class HighLevelFunction:
         return asm
     def __call__(self, args):
         return self.call(args)
+
+#Variadic functions:
+class VariadicFunction:
+    '''Class representing a high-level variadic function.'''
+    name = ''
+    params = []
+    code = []
+    def __init__(self, fname, params, fcode, debug=False):
+        self.name = fname
+
+        self.params = [Token('argc'), Token('argv')]
+        self.params = symbolise(self.params, self.name)
+        self.code = list(fcode)
+        self.symbolised = False
+        self.debug = debug
+        if fname not in high_functions and fname not in inline_functions:
+            high_functions[fname] = self
+        else:
+            raise SyntaxError(f'Multiple definitions of function "{fname}"')
+        if fname in reserved:
+            raise SyntaxError(f'Symbol "{fname}" is reserved for internal use.')
+        if fname.startswith('__'):
+            raise SyntaxError(f'Function name "{fname}" is invalid as double underscores are reserved for internal use.')
+        
+        self.called = False
+    def __repr__(self):
+        output = f'{self.name}(...)'
+        return output
+    def generate_asm(self):
+        '''Generates assembly that defines the function.'''
+        if not self.symbolised:
+            self.code = symbolise(self.code, self.name)
+            self.symbolised = True
+        for x in self.params:
+            data_sect.add_var(x.data)
+        data_sect.add_var(self.name + '.retval')
+        return generate_asm(self.code, self.name, True, self.debug)
+    def call(self, args):
+        '''Generates assembly for a function call.'''
+        #Note:  The expense for a high-level function is p(2n + 5) + l for a function with n arguments called p times, or  (2n+4) with optimisations.
+        #       The expense for a low-level function is  p(n + l), where l is the number of lines of assembly in the function.
+
+        if not self.called:
+            self.called = True
+            asm = self.generate_asm()
+            data_sect.add_function(asm)
+        callid = next_call()
+        asm = ''
+
+        
+        #Add a temporary variable to store the stack position:
+        #Push the args:
+        argc = len(args)
+        asm += evaluate_expr(f'__func.{self.name}.argc = {argc}')[0]
+        asm += evaluate_expr(f'__func.{self.name}.argv = malloc(0)')[0]
+        count = 0
+        for x in args:
+            asm += inline_functions['_setchar']([f'__func.{self.name}.argv', '__int.'+str(count), x.data])
+            count += 1
+
+        
+        #Load the return branch:
+        asm += f'LDA retbranch_{callid}\n'
+        asm += f'STA {self.name}.retbranch\n'
+        asm += f'BRA {self.name}\n'
+        asm += f'retbranch_{callid} BRA retpoint_{callid}\n'
+        asm += f'retpoint_{callid} LDA __int.0\n'
+        data_sect.add_integers(asm)
+        return asm
+    def __call__(self, args):
+        return self.call(args) 
 def compile_code(code, filename, do_optimise = True, debug=False):
-    '''Main interface for the compilation of code.'''
+    '''Main interface for the compilation of code.
+Returns the assembly as a string.'''
     splitcode = preprocess(code, filename, debug=debug)
     code = ''
     for x in splitcode:
@@ -261,12 +341,20 @@ def compile_code(code, filename, do_optimise = True, debug=False):
             func = InlineFunction(fname, params, fcode)
             inline_functions[fname.data] = func
         #High-level function:
-        if ctoken.data == 'func':
+        elif ctoken.data == 'func':
             try:
                 fname, params, fcode = tokens[position+1:position+4]
             except ValueError:
                 raise SyntaxError('Incomplete function declaration.')
             func = HighLevelFunction(fname.data, params, fcode, debug=debug)
+        #Variadic function:
+        elif ctoken.data == 'vfunc':
+            try:
+                fname, params, fcode = tokens[position+1:position+4]
+            except ValueError:
+                raise SyntaxError('Incomplete function declaration.')
+            func = VariadicFunction(fname.data, params, fcode, debug=debug)
+        
     if 'main' not in high_functions:
         raise SyntaxError('Function \'main\' needs to be defined as an entry point!')
     #Fake call main() to generate relevant code:

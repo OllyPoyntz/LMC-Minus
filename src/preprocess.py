@@ -15,12 +15,7 @@ def preprocess(code, filename, included_files = set(), debug=False):
     #Popping from the middle of a list is inefficient, but it won't make a difference for small lists.
     while x + 1 < len(splitcode):
         line = splitcode[x]
-        #Strip spaces from the line:
-        oldline = line + ' '
-        while oldline == line:
-            oldline = line
-            line = line.strip(' ').strip('\t')
-        splitline = line.split(' ')
+        splitline = line.split()
         while '' in splitline:
             splitline.remove('')
         #Handle #endif directives:
@@ -65,25 +60,27 @@ def preprocess(code, filename, included_files = set(), debug=False):
             splitcode.pop(x)
             continue
         #Handle #include directives by preprocessing the file and inserting the processed code.
-        #Files are only included once; no need for header guards or 
-        if line.startswith('#include '):
-            if len(splitline) == 2:
-                file = splitline[1]
-                if file.startswith('<') and file.endswith('>'):
-                    target_file = include_dir + '/' + file[1:-1]
+        #Files are only included once; no need for header guards.
+        if len(splitline) == 2 and splitline[0] == '#include':
+            file = splitline[1]
+            if file.startswith('<') and file.endswith('>'):
+                target_file = include_dir + '/' + file[1:-1]
+            else:
+                target_file = os.path.dirname(filename) + '/' + file[1:-1]
+            target_file = os.path.realpath(target_file)
+            try:
+                if os.path.realpath(target_file) not in included_files:
+                    included_files.add(target_file)
+                    with open(target_file, 'r', encoding='utf-8') as f:
+                        data = f.read()
+                        if debug:
+                            sys.stderr.write(f'Included file {target_file}\n')
+                        splitcode = splitcode[:x] + preprocess(data, target_file, included_files, debug) + splitcode[x+1:]
                 else:
-                    target_file = os.path.dirname(filename) + '/' + file[1:-1]
-                target_file = os.path.realpath(target_file)
-                try:
-                    if os.path.realpath(target_file) not in included_files:
-                        included_files.add(target_file)
-                        with open(target_file, 'r', encoding='utf-8') as f:
-                            data = f.read()
-                            if debug:
-                                sys.stderr.write(f'Included file {target_file}\n')
-                            splitcode = splitcode[:x] + preprocess(data, target_file, included_files, debug) + splitcode[x+1:]
-                except (FileNotFoundError, PermissionError):
-                    sys.stderr.write(f'Unable to open {target_file} for reading!\n')
-                    sys.exit(1)
+                    splitcode.pop(x)
+                    x -= 1
+            except (FileNotFoundError, PermissionError):
+                raise FileNotFoundError(f'Unable to open {target_file} for reading!\n')
+                sys.exit(1)
         x += 1
     return splitcode

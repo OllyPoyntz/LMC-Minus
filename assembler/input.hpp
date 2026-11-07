@@ -3,47 +3,48 @@
 #include <iostream>
 #include <string>
 
-// String buffer:
-std::wstring buffer;
-// Boolean for if a numeric string has been read.
-bool isnum = false;
+namespace lmc {
+	// String buffer:
+	std::wstring ibuffer;
+	// Boolean for if a numeric string has been read.
+	bool isnum = false;
 
-// Determine if a wstring is entirely numeric:
-bool is_digital(const std::wstring instring) {
-	if (instring.length() <= 1){
-		return false;
-	}
-	for (size_t i = 0; i < instring.length(); i++) {
-		wchar_t cchar = instring[i];
-		if (((cchar < '0') || (cchar > '9')) && !(cchar == '\n')) {
+	// Determine if a wstring is entirely numeric:
+	bool is_digital(const std::wstring instring) {
+		if (instring.length() <= 1){
 			return false;
 		}
+		for (size_t i = 0; i < instring.length(); i++) {
+			wchar_t cchar = instring[i];
+			if (((cchar < '0') || (cchar > '9')) && !(cchar == '\n')) {
+				return false;
+			}
+		}
+		return true;
 	}
-	return true;
-}
-// Repopulate the buffer with input:
-void flush_stdin() {
-	if (buffer.length() == 0) {
-		std::getline(std::wcin, buffer);
-		buffer += L"\n";
+	// Repopulate the buffer with input:
+	void flush_stdin() {
+		if (ibuffer.length() == 0) {
+			std::getline(std::wcin, ibuffer);
+			ibuffer += L"\n";
+		}
+		isnum = is_digital(ibuffer);
 	}
-	isnum = is_digital(buffer);
-}
-// Take the actual input:
-int read_input() {
-	if (buffer.length() == 0) {
-		flush_stdin();
+	// Take the actual input:
+	int read_input() {
+		if (ibuffer.length() == 0) {
+			flush_stdin();
+		}
+		if (isnum) {
+			int num = std::stoi(ibuffer);
+			ibuffer.clear();
+			return num;
+		}
+		else {
+			int chr = ibuffer[0];
+			ibuffer = ibuffer.substr(1, ibuffer.length() - 1);
+			return chr;
+		}
 	}
-	if (isnum) {
-		int num = std::stoi(buffer);
-		buffer.clear();
-		return num;
-	}
-	else {
-		int chr = buffer[0];
-		buffer = buffer.substr(1, buffer.length() - 1);
-		return chr;
-	}
-}
 
-
+}

@@ -6,8 +6,8 @@
 #include <utility>
 #include <vector>
 #include "lmc.hpp"
-namespace lmc {
 
+namespace lmc {
     /* Split a string using the target character as a delimeter.
        (Similar to str.split() in Python.) */
     std::vector<std::string> split_str(const std::string instring, const char target_char) {
@@ -111,12 +111,15 @@ namespace lmc {
     bool is_single(const std::string mneumonic) {
 	    return ((mneumonic == "HLT") || (mneumonic == "INP") || (mneumonic == "OUT") || (mneumonic == "OTC") || (mneumonic == "hlt") || (mneumonic == "inp") || (mneumonic == "out") || (mneumonic == "otc"));
     }
+	// An unordered map of parsed labels:
+	std::unordered_map<std::string, size_t> labels = {};
     /* Main translation function.
        Needs to return both a pointer to the machine code,
        and the length of the machine code, so a std::pair is used.
        Does not filter comments in the assembly.
     */
     std::pair<int*, size_t> assemble(const std::string code) {
+		labels.clear();
 	    std::vector<std::string> splitcode = split_str(code, '\n');
 	    size_t ramsize = 100;
 	    while (ramsize <= splitcode.size()) {
@@ -124,7 +127,6 @@ namespace lmc {
 	    }
 	    int* program = (int*)malloc(ramsize * sizeof(int));
         memset(program, 0, ramsize*sizeof(int));
-	    std::unordered_map<std::string, size_t> labels;
 	    size_t i = 0;
 	    for (i = 0; i < splitcode.size(); i++) {
 		    std::vector<std::string> splitline = split_str(splitcode[i], ' ');
@@ -223,32 +225,12 @@ int main(int argc, char* argv[]) {
     if (digits != 3) {
         std::cerr << "Executing with " << digits << " digits..." << std::endl;
     }
-    /* Templates need to be known at compile time, so several precepts are present.
-       If you manage to write an actual program that exceeds the limit,
-       I wouldn't know whether to be impressed or concerned.
-    */
-
-	if (digits == 3) {
-		lmc::LMC<3> computer;
-		computer.load_program(program.first, program.second);
-        // Note that free()ing the allocated memory is done by load_program().
-		computer.execute();
-	}
-	if (digits == 4) {
-		lmc::LMC<4> computer;
-		computer.load_program(program.first, program.second);
-		computer.execute();
-	}
-	if (digits == 5) {
-		lmc::LMC<5> computer;
-		computer.load_program(program.first, program.second);
-		computer.execute();
-	}
-	if (digits == 6) {
-		lmc::LMC<6> computer;
-		computer.load_program(program.first, program.second);
-		computer.execute();
-	}
-    std::cerr << "Unable to allocate more than 6 digits to an LMC program." << std::endl;
+	// Create the computer itself:
+	lmc::LMC computer(digits);
+	// Load the program into RAM:
+	computer.load_program(program.first, program.second);
+	// Store some symbols for debugging information:
+	computer.load_symbols(lmc::labels);
+	computer.execute();
 	return 1;
 }

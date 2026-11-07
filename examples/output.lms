@@ -1,0 +1,6 @@
+#include <stdio.lmh>
+#include <stdbool.lmh>
+func main() {
+    printf("%b, %c %s %d.\n", true, 'I', "hate", 67);
+    printf("100%%\n");
+}

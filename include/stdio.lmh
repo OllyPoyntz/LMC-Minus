@@ -1,5 +1,8 @@
 // Functions relating to input and output.
 
+
+#include <stack.lmh>
+
 // Printing a character is small enough to be inline:
 #define printc _printc
 
@@ -7,10 +10,12 @@
 func prints(string) {
     _prints(string);
 }
-// Ensure that C-style functions can be used:
+
+// Ensure that C-style output functions can be used:
 #define puts prints
 #define putchar _printc
-// Take user input, similar to Python's input function:
+
+// Take user input, similar to Python's input() function:
 func input() {
     a = 0;
     prompt();
@@ -18,18 +23,29 @@ func input() {
     return a;
 }
 
+// String input:
 func inputs(buffer) {
-	prompt();
-	strlength = 0;
-	_inputs(strlength, buffer);
-	return strlength;
+    prompt();
+    strlength = 0;
+    _inputs(strlength, buffer);
+    return strlength;
 }
-// C-style writing to stdout:
+// Another macro ensuring C-like IO functions:
+#define gets inputs
+
+// Read at most n characters from stdin, returning the number of characters read:
+func ngets(buffer, n) {
+    readlength = 0;
+    _ngets(readlength, buffer, n);
+    return readlength;
+}
+
+// Writes a given number of chars from a string to stdout:
 func write(string, chars) {
     _write(string, chars);
 }
 
-// Outputs a boolean value:
+// Outputs a boolean value (rarely used):
 func printb(bool) {
     outstr = "false\0true";
     if (bool) {
@@ -39,13 +55,17 @@ func printb(bool) {
     flush();
 }
 
-// printf equivalent (unfortunately variadic args are not supported).
-// By far the longest function in pure assembly - over 70 lines!
-func printf(format, args) {
-	_printf(format, args);
+// A simple printf equivalent, and an example of a variadic function.
+// By far one of the longest functions in pure assembly - nearly 100 lines!
+vfunc printf(argc, argv) {
+    if (argc != 0) {
+        format = argv[0];
+        args = argv + 1;
+        _printf(format, args);
+    }
 }
 
-// Stack based printf:
+// Stack based printf - arguments are popped from the stack as 
 func stackprintf(format) {
-	_stackprintf(format);
+    _stackprintf(format);
 }

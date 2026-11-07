@@ -1,0 +1,123 @@
+#include <all.lmh>
+// Since the accumulator needs to be able to store a negative integer,
+// signed arithmetic operations are necessary:
+asm _signed_ADD(sign, acc, num) {
+    LDA sign;
+    BRZ plus;
+
+    minus    LDA 0;
+            SUB acc;
+            ADD num;
+            BRP newplus;
+    
+    nwminus    LDA acc;
+            SUB num;
+            STA acc;
+            BRA return;
+
+    newplus    STA acc;
+            LDA 0;
+            STA sign;
+            BRA return;
+    
+    plus    LDA acc;
+            ADD num;
+            STA acc;
+            BRA return;
+
+    return     LDA 0;
+}
+
+asm _signed_SUB(sign, acc, num) {
+    LDA sign;
+    BRZ plus;
+        
+    minus    LDA acc;
+            ADD num;
+            STA acc;
+            BRA return;
+
+    plus    LDA acc;
+            SUB num;
+            BRP newplus;
+
+    nwminus    LDA num;
+            SUB acc;
+            STA acc;
+            LDA 1;
+            STA sign;
+            BRA return;
+    
+    newplus    STA acc;
+            BRA return;
+
+    return    LDA 0;
+}
+
+// The actual functions themselves are implemented as functions, and all have the same parameters:
+
+func _LMC_ADD(address, acc_ptr, sign_ptr, ram, pc_ptr) {
+    acc = acc_ptr[0];
+    operand = ram[address];
+    sign = sign_ptr[0];
+    _signed_ADD(sign, acc, operand);
+    sign_ptr[0] = sign;
+    acc_ptr[0] = acc;
+}
+
+func _LMC_SUB(address, acc_ptr, sign_ptr, ram, pc_ptr) {
+    acc = acc_ptr[0];
+    operand = ram[address];
+    sign = sign_ptr[0];
+    _signed_SUB(sign, acc, operand);
+    sign_ptr[0] = sign;
+    acc_ptr[0] = acc;
+}
+
+func _LMC_LDA(address, acc_ptr, sign_ptr, ram, pc_ptr) {
+    acc_ptr[0] = ram[address];
+}
+
+func _LMC_STA(address, acc_ptr, sign_ptr, ram, pc_ptr) {
+    ram[address] = acc_ptr[0];
+}
+
+func _LMC_BRA(address, acc_ptr, sign_ptr, ram, pc_ptr) {
+    pc_ptr[0] = address;
+}
+
+func _LMC_BRZ(address, acc_ptr, sign_ptr, ram, pc_ptr) {
+    if (acc_ptr[0] == 0) {
+        pc_ptr[0] = address;
+    }
+}
+
+func _LMC_BRP(address, acc_ptr, sign_ptr, ram, pc_ptr) {
+    if (sign_ptr[0] == 0) {
+        pc_ptr[0] = address;
+    }
+}
+
+func _LMC_HLT(address, acc_ptr, sign_ptr, ram, pc_ptr) {
+    retcode = acc_ptr[0];
+    exit(retcode);
+}
+
+func _LMC_OUT(address, acc_ptr, sign_ptr, ram, pc_ptr) {
+    value = acc_ptr[0];
+    if (sign_ptr[0]) {
+        putchar('-');
+    }
+    print(value);
+}
+
+func _LMC_OTC(address, acc_ptr, sign_ptr, ram, pc_ptr) {
+    value = acc_ptr[0];
+    putchar(value);
+}
+
+func _LMC_INP(address, acc_ptr, sign_ptr, ram, pc_ptr) {
+    value = input();
+    acc_ptr[0] = value;
+}
+

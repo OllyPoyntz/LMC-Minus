@@ -1,19 +1,19 @@
 // Operations used internally by the compiler.
 asm _addnum(reg, a, b) {
-	LDA a;
-	ADD b;
-	STA reg;
+    LDA a;
+    ADD b;
+    STA reg;
 }
 asm _addnuminplace(reg, a, b) {
-	LDA a;
-	ADD b;
-	STA a;
-	STA reg;
+    LDA a;
+    ADD b;
+    STA a;
+    STA reg;
 }
 asm _subnum(reg, a, b) {
-	LDA a;
-	SUB b;
-	STA reg;
+    LDA a;
+    SUB b;
+    STA reg;
 }
 asm _subnuminplace(reg, a, b) {
     LDA a;
@@ -22,152 +22,134 @@ asm _subnuminplace(reg, a, b) {
     STA reg;
 }
 asm _mulnum(reg, a, b) {
-	LDA b;
-	STA count;
+    LDA b;
+    STA count;
     LDA 0;
-    STA total;
-	loop LDA count;
-	     BRZ return;
-	     SUB 1;
-	     STA count;
-	     LDA total;
-	     ADD a;
-	     STA total;
-	     BRA loop;
-	count DAT 0;
-	total DAT 0;
-	return LDA total;
-	       STA reg;
+    STA reg;;
+    loop LDA count;
+         BRZ return;
+         SUB 1;
+         STA count;
+         LDA reg;
+         ADD a;
+         STA reg;
+         BRA loop;
+    count DAT 0;
+    return LDA 0;
 }
 asm _mulnuminplace(reg, a, b) {
-	LDA b;
-	STA count;
+    LDA b;
+    STA count;
     LDA 0;
-    STA total;
-	loop LDA count;
-	     BRZ return;
-	     SUB 1;
-	     STA count;
-	     LDA total;
-	     ADD a;
-	     STA total;
-	     BRA loop;
-	count DAT 0;
-	total DAT 0;
-	return LDA total;
-	       STA reg;
+    STA reg;
+    loop LDA count;
+         BRZ return;
+         SUB 1;
+         STA count;
+         LDA reg;
+         ADD a;
+         STA reg;
+         BRA loop;
+    count DAT 0;
+    return LDA reg;
            STA a;
 }
 asm _modnum(reg, a, b) {
     LDA a;
-    STA num;
+    STA reg;
     LDA b;
-    BRZ panic;
-    loop LDA num;
+    BRZ 0;
+    loop LDA reg;
          SUB b;
          BRP chkz;
          BRA return;
-    chkz BRZ zero;
-         STA num;
+    chkz BRZ 0;
+         STA reg;
          BRA loop;
-    num DAT 0;
-    panic HLT;
     zero SUB b;
-    return ADD b;
-           STA reg;
+    return LDA 0;
 }
 asm _modnuminplace(reg, a, b) {
     LDA a;
-    STA num;
+    STA reg;
     LDA b;
-    BRZ panic;
-    loop LDA num;
+    BRZ 0;
+    loop LDA reg;
          SUB b;
          BRP chkz;
          BRA return;
-    chkz BRZ zero;
-         STA num;
+    chkz BRZ 0;
+         STA reg;
          BRA loop;
-    num DAT 0;
-    panic HLT;
     zero SUB b;
-    return ADD b;
-           STA reg;
+    return LDA reg;
            STA a;
 }
 asm _divnum(reg, a, b) {
     LDA a;
     STA num;
     LDA b;
-    BRZ panic;
+    BRZ 0;
     LDA 0;
-    STA total;
+    STA reg;
     loop LDA num;
          SUB b;
          BRP chkz;
          BRA return;
-    chkz LDA total;
+    chkz LDA reg;
          ADD 1;
-         STA total;
+         STA reg;
          LDA num;
          SUB b;
-         BRZ zero;
+         BRZ return;
          STA num;
          BRA loop;
     num DAT 0;
-    total DAT 0;
-    panic HLT;
     zero SUB b;
     return LDA 0;
-           STA num;
-           LDA total;
-           STA reg;
+
 }
 asm _divnuminplace(reg, a, b) {
     LDA a;
     STA num;
     LDA b;
-    BRZ panic;
+    BRZ 0;
     LDA 0;
-    STA total;
+    STA reg;
     loop LDA num;
          SUB b;
          BRP chkz;
          BRA return;
-    chkz LDA total;
+    chkz LDA reg;
          ADD 1;
-         STA total;
+         STA reg;
          LDA num;
          SUB b;
-         BRZ zero;
+         BRZ return;
          STA num;
          BRA loop;
     num DAT 0;
-    total DAT 0;
-    panic HLT;
     zero SUB b;
-    return LDA 0;
-           STA num;
-           LDA total;
+    return LDA reg;
            STA reg;
            STA a;
 }
 asm _setval(dst, src) {
-	LDA src;
-	STA dst;
+    LDA src;
+    STA dst;
 }
 asm _storeptr(ptr, val) {
-	LDA __base_store;
-	ADD ptr;
-	STA loadinstr;
+    LDA __base_store;
+    ADD ptr;
+    STA loadinstr;
         LDA val;
-	loadinstr STA loadinstr;
+    loadinstr STA loadinstr;
 }
 asm _getptr(reg, val) {
-	loadop LDA val;
-	LDA loadop;
-	SUB __base_load;
-	STA reg;
+    loadop LDA val;
+    LDA loadop;
+    SUB __base_load;
+    STA reg;
 }
 asm _getindex(reg, ptr, index) {
     LDA index;
@@ -192,30 +174,30 @@ asm _storeindex(ptr, index) {
     storeinstr STA ptr;
 }
 asm _check_eq(reg, var1, var2) {
-	LDA 0;
-	STA reg;
-	LDA var1;
-	SUB var2;
-	BRP cheq;
-	BRA return;
-	cheq BRZ true;
-	BRA return;
-	true LDA 1;
-	STA reg;
-	return LDA 0;
+    LDA 0;
+    STA reg;
+    LDA var1;
+    SUB var2;
+    BRP cheq;
+    BRA return;
+    cheq BRZ true;
+    BRA return;
+    true LDA 1;
+    STA reg;
+    return LDA 0;
 }
 asm _check_neq(reg, var1, var2) {
-	LDA 0;
-	STA reg;
-	LDA var1;
-	SUB var2;
-	BRP cheq;
-	BRA true;
-	cheq BRZ return;
-	BRA true;
-	true LDA 1;
-	STA reg;
-	return LDA 0;
+    LDA 0;
+    STA reg;
+    LDA var1;
+    SUB var2;
+    BRP cheq;
+    BRA true;
+    cheq BRZ return;
+    BRA true;
+    true LDA 1;
+    STA reg;
+    return LDA 0;
 }
 asm _check_gt(reg, var1, var2) {
     LDA 0;
@@ -290,6 +272,21 @@ asm _logic_AND(reg, var1, var2) {
     LDA 1;
     STA reg;
     return LDA 0;
+}
+asm _logic_XOR(reg, var1, var2) {
+    LDA 0;
+    STA reg;
+    LDA var1;
+    BRZ chkone;
+    LDA var2;
+    BRZ setone;
+    BRA return;
+
+    chkone     LDA var2;
+               BRZ return;
+    setone     LDA 1;
+            STA reg;
+    return     LDA 0;
 }
 asm _logic_NOT(reg, var) {
     LDA var;

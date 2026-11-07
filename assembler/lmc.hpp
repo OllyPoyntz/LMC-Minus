@@ -1,9 +1,10 @@
 //  Functions and a class emulating the Little Man Computer.
 #pragma once
-#include <iostream>
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
-#include <cmath>
+#include <iostream>
+#include <unordered_map>
 #include "input.hpp"
 namespace lmc {
 
@@ -60,7 +61,7 @@ void print_ram(const int* ram, const size_t length) {
     }
     std::cerr << std::endl;
 }
-void print_instruction(const int opcode, const int operand) {
+void print_instruction(const int opcode, const int operand, std::unordered_map<size_t, std::string> labels) {
     std::string mneumonic;
     switch (opcode) {
         case 0:
@@ -104,21 +105,29 @@ void print_instruction(const int opcode, const int operand) {
         default:
             return;
     }
-    std::cerr << mneumonic << " " << operand << std::endl;
+	const std::string label = labels[operand];
+	if (label.length() != 0) {
+	    std::cerr << mneumonic << " " << label << std::endl;		
+	}
+	else {
+    	std::cerr << mneumonic << " " << operand << std::endl;
+	}
 }
        
             
 #endif
 
 // Class which actually implements the Little Man Computer:
-template <size_t digits>
 class LMC {
 	private:
 	int* ram;
 	int pc = 0;
 	int acc = 0;
+	size_t digits = 0;
+	std::unordered_map<size_t, std::string> symbols;
 	public:
-	LMC() {
+	LMC(const size_t num_digits) {
+		digits = num_digits;
 		size_t membytes = sizeof(int) * (size_t)round(pow(10, digits-1));
 		ram = (int*)malloc(membytes);
 		memset(ram, 0, membytes);
@@ -135,6 +144,12 @@ class LMC {
         print_ram(ram, (size_t)round(pow(10, digits-1)));
         #endif
 	}
+	// Loads symbols from an unordered map to aid debugging.
+	void load_symbols(std::unordered_map<std::string, size_t> labels) {
+		for (auto i : labels) {
+			symbols[i.second] = i.first;
+		}
+	}
     // Initiates the execution.
 	void execute() {
 		for (;;) {
@@ -146,7 +161,7 @@ class LMC {
             // Debug information:
             #ifdef DEBUG
             std::cerr << "PC: " << pc << "; ACC: " << acc << std::endl;
-            print_instruction(opcode, operand);
+            print_instruction(opcode, operand, symbols);
             #endif
             // Increment the program counter:
 			pc++;

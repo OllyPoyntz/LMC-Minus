@@ -1,0 +1,52 @@
+// Virtual machine of the LMC.
+
+#include <all.lmh>
+#include <lmc/_instruction.lmh>
+
+
+
+
+
+
+func execute_vm(machine_code, digits) {
+    
+    // Calculate a few constants:
+    pow2 = digits-1;
+    ram_size = pow(10, pow2);
+    // Virtual hardware:
+    ram = machine_code;
+    // Program counter:
+    pc = 0;
+    pointer pc_ptr(pc);
+    // Accumulator:
+    acc = 0;
+    pointer acc_ptr(acc);
+    sign = 0;
+    pointer sign_ptr(sign);
+    
+    // The loop below emulates the FDE cycle:
+    while (true) {
+        // Fetch stage:
+        instruction = ram[pc];
+        pc += 1;
+        // Decode stage:
+        opcode = instruction / ram_size;
+        operand = instruction - (ram_size * opcode);
+        // Execute stage:
+        if (opcode == 0) { return acc; }
+        if (opcode == 1) { _LMC_ADD(operand, acc_ptr, sign_ptr, ram, pc_ptr); }
+        if (opcode == 2) { _LMC_SUB(operand, acc_ptr, sign_ptr, ram, pc_ptr); }
+        if (opcode == 3) { _LMC_STA(operand, acc_ptr, sign_ptr, ram, pc_ptr); }
+        if (opcode == 5) { _LMC_LDA(operand, acc_ptr, sign_ptr, ram, pc_ptr); }
+        if (opcode == 6) { _LMC_BRA(operand, acc_ptr, sign_ptr, ram, pc_ptr); }
+        if (opcode == 7) { _LMC_BRZ(operand, acc_ptr, sign_ptr, ram, pc_ptr); }
+        if (opcode == 8) { _LMC_BRP(operand, acc_ptr, sign_ptr, ram, pc_ptr); }
+        if (opcode == 9) {
+            if (operand == 1) { _LMC_INP(operand, acc_ptr, sign_ptr, ram, pc_ptr); }
+            if (operand == 2) { _LMC_OUT(operand, acc_ptr, sign_ptr, ram, pc_ptr); }
+            if (operand == 22) { _LMC_OTC(operand, acc_ptr, sign_ptr, ram, pc_ptr); }
+        }
+    }
+}
+    
+        

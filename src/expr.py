@@ -5,18 +5,24 @@ from .lowlink import inline_functions
 from .data import data_sect
 #High-level functions written in Little Man C-:
 high_functions = {}
-small = lambda : -999
-prio = defaultdict(small, {
+#Priority of certain operators:
+prio = defaultdict(lambda : -999, {
+    #Standard arithmetic following the rules of BODMAS (or BIDMAS, or PEMDAS, or whatever acronym):
     '+':1,
     '-':1,
     '*':2,
     '/':2,
     '%':2,
+    #Logical operators:
     '||':3,
     '&&':3,
+    '^^':3,
+    #In place operators:
     '+=':0,
     '-=':0,
     '*=':0,
+    '/=':0,
+    '%=':0,
     #Comparison operators:
     '==':-1,
     '!=':-1,
@@ -48,6 +54,7 @@ operator_functions = {
     '>=':'_check_gteq',
     '||':'_logic_OR',
     '&&':'_logic_AND',
+    '^^':'_logic_XOR',
     }
 def convert_string_literals(tokens, asm, registers):
     for x in range(len(tokens)):
@@ -118,9 +125,10 @@ def evaluate_expr(expression, registers = 0) -> tuple:
             func = inline_functions['_storeptr']
         else:
             func = inline_functions['_setval']
-        
-        asm += func([tokens[0].data, reg])
-        data_sect.add_var(tokens[0].data)
+        if var.data.startswith('__int.') or var.data in ('__base_store', '__base_load', '__ram_size'):
+            raise SyntaxError(f'Label {var.data} is a constant and should not be modified.')
+        asm += func([var.data, reg])
+        data_sect.add_var(var.data)
         return (asm, '__reg.0')
     #Handle writing to arrays:
     if len(tokens) >= 4 and isinstance(tokens[1], TokenList) and tokens[2].data == '=' and tokens[0].ttype == 'sym':
@@ -141,12 +149,28 @@ STA __ptr
         new_expr = [Token('__ptr')] + tokens[2:-1]
         final_asm, final_reg = evaluate_expr(new_expr, registers)
         return (asm + final_asm, final_reg)
+
     while position + 1 < len(tokens):
         item = tokens[position]
         if isinstance(item, Token) and item.data not in data_sect.vars:
             if not item.data.startswith('__int.') and item.data.startswith('__func'):
                 raise SyntaxError(f'Undefined variable: \"{item.data}\"')
         opr = tokens[position + 1]
+        
+        #Prefix NOT operator:
+        if item.ttype == 'opr' and item.data == '!':
+            if (opr.ttype not in (None, 'sym')):
+                raise SyntaxError(f'Invalid logical operand: "{opr.data}"')
+            #Evaluate the operand:
+            newasm, out_reg = evaluate_expr([opr], registers)
+            asm += newasm
+            reg = data_sect.add_register(registers)
+            registers += 1
+            asm += inline_functions['_logic_NOT']([reg, out_reg])
+            final_asm, final_reg = evaluate_expr(tokens[:position] + [Token(reg)] + tokens[position+2:-1], registers)
+            asm += final_asm
+            return (asm, final_reg)
+            
         if item.ttype != 'sym' and not isinstance(item, TokenList):
             raise SyntaxError(f'Unexpected token "{item.data}" at position {position+1} in expression!')
         #Operator is a TokenList - either a function call or a 

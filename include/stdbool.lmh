@@ -1,4 +1,5 @@
 // Macro-only header defining boolean literals:
+
 #define true __int.1
 #define false __int.0
 

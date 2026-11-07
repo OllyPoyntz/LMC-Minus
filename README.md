@@ -30,7 +30,7 @@ All directories in the project are listed below:
 - [src](/src): Python source code for the actual compiler.
 
 # License
-The whole project, including the Python compiler, C++ assembler/VM, the LMC assembly library files, and the LMC- headers, is licensed under the permissive MIT license. This does not restrict the licenses you place on any code you write in LMC-, if you were to seriously attempt to write a project in this language for some cursed reason.
+The whole project, including the Python compiler, C++ assembler/VM, and the assembly+header files that comprise the standard library, is licensed under the permissive MIT license. This does not restrict how you choose to license any code you write in LMC-, if you were to seriously attempt to write a project in this language for some cursed reason.
 
 
 

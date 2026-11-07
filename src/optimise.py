@@ -27,7 +27,6 @@ def optimise(asm, debug=False):
         while splitcode[x].endswith(' '):
             splitcode[x] = splitcode[x][:-1]
     #Remove redundant load operations.
-
     for _ in range(3):
         x = 0
         while x < len(splitcode):
@@ -41,6 +40,20 @@ def optimise(asm, debug=False):
                         if debug:
                             sys.stderr.write(f'Removed redundant load operation on "{splitline2[1]}"\n')
             x += 1
+    #Remove addition and subtraction with 0 (which is pointless):
+    x = 0
+    while x < len(splitcode):
+        splitline = splitcode[x].split(' ')
+        if len(splitline) > 1:
+            if splitline[-1] == '__int.0' and splitline[-2] in ('ADD', 'SUB'):
+                splitcode.pop(x)
+                if debug:
+                    sys.stderr.write(f'Removed redundant arithmetic operation "')
+                    if len(splitline) == 3:
+                        sys.stderr.write(f'{splitline[0]}')
+                    sys.stderr.write(f'{splitline[-2]} __int.0"\n')
+                continue
+        x += 1
     #Remove unreferenced symbols:
     for _ in range(10):
         x = 0
@@ -53,6 +66,7 @@ def optimise(asm, debug=False):
                         splitcode.pop(x)
                         if debug:
                             sys.stderr.write(f'Removed unnecessary symbol "{label}"\n')
+                        continue
             x += 1
 
     #Remove 'filler' load operations:
@@ -97,7 +111,7 @@ def optimise(asm, debug=False):
                         sys.stderr.write(f'Removed redundant store operation on {store_location}\n')
         x += 1
     #Remove unreferenced symbols again:
-    for _ in range(10):
+    for _ in range(3):
         x = 0
         while x < len(splitcode):
             splitline = splitcode[x].split(' ')

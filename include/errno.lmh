@@ -1,0 +1,27 @@
+// Incomplete error thingy, similar to C's <errno.h> library.
+// Not yet implemented fully by standard library functions.
+
+// The variable itself (created as a global variable by the compiler):
+#define errno __errno
+
+// Alternative function interface:
+#define set_errno _set_errno
+
+// The set of errnos:
+
+// All clear:
+#define LMC_OKAY 0
+// Null pointer passed to function:
+#define LMC_NULL 1
+// Attempted division by zero:
+#define LMC_ZDIV 2
+// Attempt to access a pointer out of the valid memory range:
+#define LMC_BADP 3
+// Not enough memory on the stack:
+#define LMC_FSTK 4
+// Problem with variadic function arguments:
+#define LMC_VARG 5
+// Bad string being passed to function:
+#define LMC_BSTR 6
+ // Numeric argument out of range:
+#define LMC_DOMN 7

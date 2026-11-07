@@ -1,5 +1,5 @@
 // Functions relating to the free store stack.
-#include <stddef.lmh>
+
 
 // Memory allocation using a stack-based method:
 func malloc(amount) {
@@ -8,26 +8,36 @@ func malloc(amount) {
     return ptr;
 }
 
-// Zero-initialised allocation:
+// Zero-initialised allocation of memory:
 func calloc(amount) {
-    ptr = malloc(amount);
-    memset(ptr, 0, amount);
+    ptr = 0;
+    _malloc(ptr, amount);
+    _memset(ptr, 0, amount);
     return ptr;
 }
 
-// Freeing allocated memory:
+// Freeing allocated memory by moving the stack pointer back:
 func free(amount) {
     _free(amount);
 }
 
-// Push a value onto the stack:
+// Push a value onto the stack, moving the stack pointer:
 func push(val) {
-	_push(val);
+    _push(val);
 }
 
-// Pop a value from the stack:
+// Pop a value from the stack, moving the stack pointer:
 func pop() {
-	a = 0;
-	_pop(a);
-	return a;
+    a = 0;
+    _pop(a);
+    return a;
+}
+
+// Reset the stack (small enough to be macro):
+#define reset_stack _reset_stack
+
+// Push multiple values onto the stack with a variadic function:
+vfunc vpush(argc, argv) {
+    // Since the variadic arguments go on the stack anyway, we just need to update the stack pointer:
+    STACK_POS += argc;
 }

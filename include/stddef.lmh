@@ -1,15 +1,24 @@
-// Constants which are useful when programming
+// Constants and macros which are useful in general programming:
+
+// Boolean literals:
 #include <stdbool.lmh>
+
+// Operators:
+#include <operator.lmh>
+
+// Errors:
+#include <errno.lmh>
+
 // Null pointers:
 #define NULL __int.0
 #define NULLPTR __int.0
 
-// These are constants mainly used by assembly, but might be useful:
+// These are constants mainly used by assembly, but might be useful.
+// (The expression module has protections against modifying any of these):
 #define RAM_SIZE __ram_size
-#define	BASE_LOAD __base_load
+#define BASE_LOAD __base_load
 #define BASE_STORE __base_store
 
-// This isn't a constant, but still a useful variable:
+// This isn't a constant, but still a useful variable if you're going to be messing around with the stack:
 #define STACK_POS __stack_pos
-
 

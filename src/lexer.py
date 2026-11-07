@@ -9,14 +9,18 @@ quotes = ('\'', '\"')
 #Escape sequences:
 escape = {'n':'\n', 't':'\t','\"':'\"', '\'':'\'', '\\':'\\', '0':'\0'}
 #Operators:
-operators = ('+', '-', '*',  '/', '%', '**', '<<', '>>',  '=', '==', '!=', '!', '>', '<', '>=', '<=', '@', '+=', '-=', '*=', '/=', '%=', '&', '&&', '|', '||')
+operators = ('+', '-', '*',  '/', '%', '**', '<<', '>>',  '=', '==', '!=', '!', '>', '<', '>=', '<=', '@', '+=', '-=', '*=', '/=', '%=', '&', '&&', '|', '||', '^', '^^')
 #The six primary types of token:
 tokentypes = ('opr',  'brc', 'str', 'chr', 'int', 'sym')
+#Reserved names - functions cannot be called this:
+reserved = ('_start', '__ram_size', '__base_load', '__base_store', '__stack_pos')
 
-def is_valid_symbol(sym) -> bool:
-    '''Determines if a string is allowed for use as a variable/function name.'''
-    letters = [ord(x) for x in range(ord('a'), ord('z')+1)] + [ord(x) for x in range(ord('A'), ord('Z')+1)]
-    numbers = [ord(x) for x in range(ord('0'), ord('9')+1)]
+def check_valid_symbol(sym) -> bool:
+    '''Determines if a string is allowed for use as a variable/function name.'''#
+    #Function names must only contain alphanumeric ASCII characters, underscores, and dots:
+    if sym == ';': return None
+    letters = [chr(x) for x in range(ord('a'), ord('z')+1)] + [chr(x) for x in range(ord('A'), ord('Z')+1)]
+    numbers = [chr(x) for x in range(ord('0'), ord('9')+1)]
     punctuation = ('_', '.')
     for char in sym:
         if char not in letters and char not in numbers and char not in punctuation:
@@ -34,31 +38,32 @@ class Token:
             count += 1
             if count >= 256:
                 raise SyntaxError('Infinite definition loop detected!')
-        if isinstance(string, Token):
+        if isinstance(self.data, Token):
             self.data = string.data
             self.ttype = string.ttype
-        elif string in brackets:
+        elif self.data in brackets:
             #Bracket (should be unused, but added for contingency).
             self.ttype = 'brc'
-        elif string in operators:
+        elif self.data in operators:
             #Operator:
             self.ttype = 'opr'
-        elif string[0] in quotes:
+        elif self.data[0] in quotes:
             #Character literals use single quotes - e.g '0'.
             #String literals use double quotes - e.g "0".
             #This is standard practice in C and other languages with separate character and string types.
-            if string[0] == '\'':
+            if self.data[0] == '\'':
                 self.ttype = 'sym'
                 self.data = '__int.' + str(ord(string[1]))
             else:
                 self.ttype = 'str'
                 self.data = string[1:-1]
-        elif string.isnumeric():
+        elif self.data.isnumeric():
             #Integer literal:
             self.ttype = 'int'
         else:
             #Generic 'symbol' type. Often a variable, function, or assembly mneumonic (where applicable).
             self.ttype = 'sym'
+            check_valid_symbol(self.data)
     def __eq__(self, other):
         if self.ttype == other:
             return True
@@ -70,6 +75,7 @@ class Token:
         return hash(self.ttype + self.data)
     def __repr__(self):
         return f'Token<{self.ttype}>("{self.data.__repr__()[1:-1]}")'
+#Brackets get parsed into one of these:
 class TokenList:
     '''A list of tokens. Self-explanatory.'''
     tokens = []
@@ -115,8 +121,8 @@ def tokenise(code) -> list:
     tokenstack = []
     #Tokens in the current expression:
     ctokens = []
-    #The variable 'tokens' gets manipulated so that tokens are added to the top list
-    #on the token stack above.
+    #The variable 'tokens' gets manipulated so that tokens
+    # are added to the top list on the token stack above.
     tokens = ctokens
     line = 1
     position = -1
@@ -147,6 +153,7 @@ def tokenise(code) -> list:
                 quote = False
                 tokens.append(Token(cstring))
                 cstring = ''
+            #Escape sequences:
             elif cchar == '\\':
                 esc = code[position+1]
                 if esc in escape:
